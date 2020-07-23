@@ -4,7 +4,6 @@
 This is a works-in-progress - the script that I have written to process the Phase 2 data from
 the 4CE consortium into a table containing every AKI episode is still largely incomplete.
 
-===================
 Milestones achieved
 ===================
 1) Detection of AKI using serum Cr trends
@@ -14,7 +13,6 @@ Milestones achieved
   earlier rolling-window-based method to detect true serum Cr peaks
 2) Generating graphs of serum Cr trends after peak serum Cr with ggplot2
 
-=================
 Future Directions
 =================
 1) Compare serum Cr trends between severe and non-severe patients
@@ -26,7 +24,6 @@ Future Directions
 - Time to AKI onset
 - COVID-19 severity using AKI characteristics
 
-====================
 System Prerequisites
 ====================
 1) R 3.6 or greater
@@ -37,7 +34,6 @@ System Prerequisites
 - pracma
 - RcppRoll
 
-=========================
 Additional Files Required
 =========================
 1) ICD9/10 codes of common comorbidities (comorbid_icd_code.csv)
@@ -56,7 +52,6 @@ icd_code: ICD code
 type: prothrombotic event type (dvt,vt,pe,mi)
 description: String of diagnosis (for easier readability)
 
-==========
 How to Use
 ==========
 1) Ensure pre-requisite custom files are present alongside the 4CE data tables.
