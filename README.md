@@ -57,3 +57,4 @@ How to Use
 1) Ensure pre-requisite custom files are present alongside the 4CE data tables.
 2) Edit the main script "aki_detection_phase2.R" to ensure that the correct path to the required
    CSV files are there
+3) Run the script "aki_detection_phase2.R"
