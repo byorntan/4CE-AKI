@@ -1,20 +1,20 @@
-#4CE COVID-19 Consortium - Acute Kidney Injury
+# 4CE COVID-19 Consortium - Acute Kidney Injury
 
 This is a works-in-progress - the script that I have written to process the Phase 2 data from the 4CE consortium into a table containing every AKI episode is still largely incomplete.
 
-##Milestones achieved
+## Milestones achieved
 1) Detection of AKI using serum Cr trends
    - Using a rolling time window and KDIGO criteria with the minimum serum Cr in the time window as the baseline Cr
    - Using pracma::findpeaks() to detect peaks in Cr and then matching these peaks against the earlier rolling-window-based method to detect true serum Cr peaks
 2) Generating graphs of serum Cr trends with ggplot2
 
-##Future Directions
+## Future Directions
 1) Generate a model (starting with GLM-based models) to predict the following:
    - AKI severity
    - Time to AKI onset
    - COVID-19 severity using AKI characteristics
 
-##System Prerequisites
+## System Prerequisites
 1) R 3.6 or greater (ideally)
 2) Following R packages must be installed:
    - dplyr, tidyr, purrr, ggplot2 (all are part of the tidyverse package)
@@ -23,7 +23,7 @@ This is a works-in-progress - the script that I have written to process the Phas
    - pracma
    - RcppRoll
 
-##Additional Files Required
+## Additional Files Required
 1) ICD9/10 codes of common comorbidities (comorbid_icd_code.csv)
    This file must be a .csv containing the following headers:
 ```
