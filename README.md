@@ -11,22 +11,18 @@ Milestones achieved
   as the baseline Cr
 - Using pracma::findpeaks() to detect peaks in Cr and then matching these peaks against the 
   earlier rolling-window-based method to detect true serum Cr peaks
-2) Generating graphs of serum Cr trends after peak serum Cr with ggplot2
+2) Generating graphs of serum Cr trends with ggplot2
 
 Future Directions
 =================
-1) Compare serum Cr trends between severe and non-severe patients
-- AKI and non-AKI patients
-- Patients who sustain an AKI before disease severity onset, vs patients who sustain AKI after
-  disease severity onset
-2) Generate a model (starting with GLM-based models) to predict the following:
+1) Generate a model (starting with GLM-based models) to predict the following:
 - AKI severity
 - Time to AKI onset
 - COVID-19 severity using AKI characteristics
 
 System Prerequisites
 ====================
-1) R 3.6 or greater
+1) R 3.6 or greater (ideally)
 2) Following R packages must be installed:
 - dplyr, tidyr, purrr, ggplot2 (all are part of the tidyverse package)
 - data.table
@@ -55,6 +51,12 @@ description: String of diagnosis (for easier readability)
 How to Use
 ==========
 1) Ensure pre-requisite custom files are present alongside the 4CE data tables.
-2) Edit the main script "aki_detection_phase2.R" to ensure that the correct path to the required
+2) Edit the file import script "file_prep.R" to ensure that the correct path to the required
    CSV files are there
-3) Run the script "aki_detection_phase2.R"
+3) Ensure the following scripts are in the same directory:
+   - file_prep.R
+   - demog_comorbid_thromb_severe.R
+   - aki_detection.R
+   - medications.R
+   - figure1_cr_trends.R
+3) Run the main script "run_aki_analysis.R"
