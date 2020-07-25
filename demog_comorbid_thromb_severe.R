@@ -32,6 +32,7 @@ comorbid_icd10 <- merge(comorbid_icd10,comorbid_icd10_ref,by="icd_code",all.x=TR
 comorbid <- rbind(comorbid_icd9,comorbid_icd10)
 comorbid <- comorbid[,-2]
 comorbid$present <- 1
+comorbid <- comorbid %>% distinct()
 comorbid <- spread(comorbid,comorbid_type,present)
 comorbid[is.na(comorbid)] <- 0
 
@@ -46,6 +47,7 @@ thromb_icd9 <- merge(thromb_icd9,thromb_icd9_ref,by="icd_code",all.x=TRUE)
 thromb_icd10 <- merge(thromb_icd10,thromb_icd10_ref,by="icd_code",all.x=TRUE)
 thromb_diag <- rbind(thromb_icd9,thromb_icd10)
 thromb_diag <- thromb_diag[,c(1,4,2)]
+thromb_diag <- thromb_diag %>% distinct()
 thromb_diag <- spread(thromb_diag,type,days_since_admission)
 thromb_diag[is.na(thromb_diag)] <- -999
 
@@ -53,7 +55,7 @@ thromb_diag[is.na(thromb_diag)] <- -999
 # Time to Intubation
 # ====================
 # (1) Determine intubation from procedure code
-intubation_code <- c("0BH17EZ","5A093*", "5A094*", "5A095*","96.04","96.70","96.71","96.72")
+intubation_code <- c("0BH13EZ","0BH17EZ","0BH18EZ","0B21XEZ","5A09357","5A09358","5A09359","5A0935B","5A0935Z","5A09457","5A09458","5A09459","5A0945B","5A0945Z","5A09557","5A09558","5A09559","5A0955B","5A0955Z","96.7","96.04","96.70","96.71","96.72")
 intubation <- procedures[procedures$procedure_code %in% intubation_code,-c(2,4)]
 intubation <- intubation[,c(1,2)]
 intubation <- intubation[order(intubation$patient_id,intubation$days_since_admission)]
@@ -65,3 +67,18 @@ vap_ards_diag <- diagnosis[diagnosis$icd_code %in% vap_ards_codes,]
 intubation <- rbind(vap_ards_diag[,c(1,3)],intubation)
 intubation <- intubation[order(intubation$patient_id,intubation$days_since_admission)]
 intubation <- intubation[!duplicated(intubation$patient_id),]
+
+# ==================
+# Time to RRT
+# ==================
+rrt_code <- c("5A1D70Z","5A1D80Z","5A1D90Z","3E1.M39Z","549.8","399.5")
+#hd_code <- c("5A1D70Z","5A1D80Z","5A1D90Z","399.5")
+#pd_code <- c("3E1.M39Z","549.8")
+rrt <- procedures[procedures$procedure_code %in% rrt_code,-c(2,4)]
+rrt <- rrt[,c(1,2)]
+rrt <- rrt[order(rrt$patient_id,rrt$days_since_admission)]
+rrt <- rrt[!duplicated(rrt$patient_id),]
+
+# Generate list of patients already on RRT prior to admission
+# This list can be used to exclude ESRF patients in subsequent analyses
+patients_already_rrt <- rrt$patient_id[rrt$days_since_admission < 0,1]
