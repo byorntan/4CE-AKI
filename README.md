@@ -25,7 +25,7 @@ This is a works-in-progress - the script that I have written to process the Phas
 
 ## Additional Files Required
 1) ICD9/10 codes of common comorbidities (comorbid_icd_code.csv)
-      This file must be a .csv containing the following headers:
+   * This file must be a .csv containing the following headers:
 ```
 icd_version	icd_code	comorbid_type	description
 icd_version: ICD version (DIAG-ICD9, DIAG-ICD10)
@@ -35,7 +35,7 @@ description: String of diagnosis (for easier readability)
 ```
 
 2) ICD9/10 codes of prothrombotic events (thromb_icd_code.csv)
-      This file must be a csv containing following headers:
+   * This file must be a csv containing following headers:
 ```
 icd_version	icd_code	type	description
 icd_version: ICD version (DIAG-ICD9, DIAG-ICD10)
@@ -46,8 +46,7 @@ description: String of diagnosis (for easier readability)
 
 ## How to Use
 1) Ensure pre-requisite custom files are present alongside the 4CE data tables.
-2) Edit the file import script "file_prep.R" to ensure that the correct path to the required
-   CSV files are there
+2) Edit the file import script "file_prep.R" to ensure that the correct path to the required CSV files are there
 3) Ensure the following scripts are in the same directory:
    - file_prep.R
    - demog_comorbid_thromb_severe.R
