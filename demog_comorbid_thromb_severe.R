@@ -11,6 +11,7 @@ demographics_filt <- demographics_filt %>% mutate(length_stay = ifelse(still_in_
 
 # Reorder the columns to be more readable
 demographics_filt <- demographics_filt[,c(1,2,11:13,17,8,15,10,16)]
+
 # Final headers for demographics_filt
 # patient_id  site_id sex age_group race  length_stay severe  time_to_severe  deceased  time_to_death
 
@@ -51,6 +52,17 @@ thromb_diag <- thromb_diag %>% distinct()
 thromb_diag <- spread(thromb_diag,type,days_since_admission)
 thromb_diag[is.na(thromb_diag)] <- -999
 
+# Final headers for comorbid table
+# Note: order of columns may depend on the overall characteristics of your patient population
+# patient_id	ihd,htn,dm,asthma,copd,bronchiectasis,ild,ckd,pe,dvt,cancer
+# Values stored are in binary, 1 = present, 0 = absent
+
+# Final headers for thromb_diag table
+# Note: order of columns may depend on the overall characteristics of your patient population
+# patient_id	dvt,vt,pe,mi
+# Values stored are the number of days since admission when the event was first recorded
+# (stored as -999 if no such event occurred)
+
 # ====================
 # Time to Intubation
 # ====================
@@ -68,6 +80,10 @@ intubation <- rbind(vap_ards_diag[,c(1,3)],intubation)
 intubation <- intubation[order(intubation$patient_id,intubation$days_since_admission)]
 intubation <- intubation[!duplicated(intubation$patient_id),]
 
+# Final table headers:
+# patient_id	days_since_admission
+# days_since_admission = time to first intubation event
+
 # ==================
 # Time to RRT
 # ==================
@@ -82,3 +98,11 @@ rrt <- rrt[!duplicated(rrt$patient_id),]
 # Generate list of patients already on RRT prior to admission
 # This list can be used to exclude ESRF patients in subsequent analyses
 patients_already_rrt <- rrt$patient_id[rrt$days_since_admission < 0,1]
+
+# Generate list of patients who were only initiated on RRT for the first time ever
+# during admission for COVID-19
+rrt_new <- rrt[!(rrt$patient_id %in% patients_already_rrt),]
+
+# Final table headers for rrt and rrt_new:
+# patient_id	days_since_admission
+# days_since_admission = time to first RRT event
