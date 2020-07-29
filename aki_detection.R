@@ -222,9 +222,6 @@ colnames(labs_aki_summ)[13] <- "aki_end"
 # aki_start - time at which Cr begins to rise
 # aki_end - time at which Cr goes back to baseline / before the start of next AKI
 
-# Save the generated AKI table for future reference
-write.csv(labs_aki_summ,"PatientAKIEvents.csv",row.names=FALSE)
-
 # We also want to generate tables to determine (1) if AKIs occurred before/after severe disease onset 
 # (2) how long before/after disease severity
 # These tables will help in segregating the populations for analysis later
