@@ -56,6 +56,7 @@ akd_grade_7d <- function(x) {
   cr_7d = as.numeric(x[9])
   grade = 0
   ratio = creat/baseline
+  diff = creat - baseline
   # We will code grade B/C as 0.5
   if(ratio > 1.25) {
     grade = 0.5
@@ -82,6 +83,7 @@ akd_grade_90d <- function(x) {
   cr_90d = as.numeric(x[10])
   grade = 0
   ratio = creat/baseline
+  diff = creat - baseline
   # We will code grade B/C as 0.5
   if(ratio > 1.25) {
     grade = 0.5
@@ -175,7 +177,7 @@ labs_cr_aki$akd_7d <- apply(labs_cr_aki,1,akd_grade_7d)
 labs_cr_aki$akd_90d <- apply(labs_cr_aki,1,akd_grade_90d)
 
 # Generate delta Cr (current Cr - baseline Cr<7day>)
-labs_cr_aki <- labs_cr_aki %>% group_by(patient_id) %>% mutate(delta_cr = max(value-min_cr_7day, value-min_cr_7day_retro))%>% ungroup()
+labs_cr_aki <- labs_cr_aki %>% group_by(patient_id,days_since_admission) %>% mutate(delta_cr = max(value-min_cr_7day, value-min_cr_7day_retro))%>% ungroup()
 
 # Generate a separate peak table using the pracma::findpeaks function
 # We will use these as a filter for detecting the real peaks in Cr and match these against those detected using the rolling window method
