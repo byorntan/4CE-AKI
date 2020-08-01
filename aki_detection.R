@@ -3,7 +3,6 @@ library(tidyr)
 library(purrr)
 library(data.table)
 library(RcppRoll)
-library(pracma)
 library(zoo)
 
 aki_kdigo_grade <- function(x) {
@@ -12,7 +11,7 @@ aki_kdigo_grade <- function(x) {
   baseline_48h = as.numeric(x[6])
   grade = 0
   diff = creat - baseline_48h
-  ratio = creat/baseline_7d
+  ratio = round(creat/baseline_7d,2)
   if(diff > 26.5 || ratio >= 1.5) {
     grade = 1
   }
@@ -33,7 +32,7 @@ aki_kdigo_grade_retro <- function(x) {
   baseline_48h = as.numeric(x[8])
   grade = 0
   diff = creat - baseline_48h
-  ratio = creat/baseline_7d
+  ratio = round(creat/baseline_7d,2)
   if(diff > 26.5 || ratio >= 1.5) {
     grade = 1
   }
@@ -55,7 +54,7 @@ akd_grade_7d <- function(x) {
   baseline = min(baseline_7d,baseline_48h,baseline_7d_retro,baseline_48h_retro)
   cr_7d = as.numeric(x[9])
   grade = 0
-  ratio = creat/baseline
+  ratio = round(creat/baseline,2)
   diff = creat - baseline
   # We will code grade B/C as 0.5
   if(ratio > 1.25) {
@@ -82,7 +81,7 @@ akd_grade_90d <- function(x) {
   baseline = min(baseline_7d,baseline_48h,baseline_7d_retro,baseline_48h_retro)
   cr_90d = as.numeric(x[10])
   grade = 0
-  ratio = creat/baseline
+  ratio = round(creat/baseline,2)
   diff = creat - baseline
   # We will code grade B/C as 0.5
   if(ratio > 1.25) {
@@ -98,6 +97,39 @@ akd_grade_90d <- function(x) {
     grade = 3
   }
   grade
+}
+
+pos_min <- function(cr,day,lag=TRUE,gap=7) {
+  len = length(cr)
+  day_pos = day
+  for(i in 1:len) {
+    if(lag) {
+      j = max(1,i-gap)
+      pos = j-1+which.min(cr[j:i])
+      day_pos[i] = day[pos]
+    } else {
+      j = min(i+gap,len)
+      pos = i-1+which.min(cr[i:j])
+      day_pos[i] = day[pos]
+    }
+  }
+  day_pos
+}
+
+which.peaks <- function(x,partial=TRUE,decreasing=FALSE) {
+  if(decreasing) {
+    if(partial) {
+      which(diff(c(FALSE,diff(x) > 0,TRUE)) > 0)
+    } else {
+      which(diff(diff(x)>0)>0) + 1
+    }
+  } else {
+    if(partial) {
+      which(diff(c(TRUE,diff(x) >= 0,FALSE)) < 0)
+    } else {
+      which(diff(diff(x)>=0)<0) + 1
+    }
+  }
 }
 
 # ====================
@@ -176,51 +208,49 @@ labs_cr_aki <- labs_cr_aki %>% group_by(patient_id,days_since_admission) %>% mut
 labs_cr_aki$akd_7d <- apply(labs_cr_aki,1,akd_grade_7d)
 labs_cr_aki$akd_90d <- apply(labs_cr_aki,1,akd_grade_90d)
 
-# Generate delta Cr (current Cr - baseline Cr<7day>)
-labs_cr_aki <- labs_cr_aki %>% group_by(patient_id,days_since_admission) %>% mutate(delta_cr = max(value-min_cr_7day, value-min_cr_7day_retro))%>% ungroup()
 
-# Generate a separate peak table using the pracma::findpeaks function
-# We will use these as a filter for detecting the real peaks in Cr and match these against those detected using the rolling window method
-# This will also give us the start and end times of the peaks
-labs_cr_peak <- data.table(labs_cr_aki,key=c("patient_id","days_since_admission"))
-labs_cr_peak <- labs_cr_peak %>% group_by(patient_id) %>% complete(days_since_admission = full_seq(days_since_admission,1)) %>% mutate(value = na.approx(value,na.rm=FALSE))
-labs_cr_peak <- labs_cr_peak %>% split(.$patient_id) %>% map(~findpeaks(.$value)) %>% map_df(~data_frame(peak_cr = .x[,1],index_peak=.x[,2],index_start = .x[,3],index_end = .x[,4]),.id='patient_id') %>% arrange(patient_id,index_peak)
-# The problem with the above method is that it does not interpolate leading NAs - we need to offset the indexes obtained using pracma::findpeaks()
-labs_peak_offset <- labs_cr_aki %>% group_by(patient_id) %>% summarise(day_start = min(days_since_admission))
-labs_peak_offset$day_offset <- labs_peak_offset$day_start - 1
-labs_peak_offset <- labs_peak_offset[,c(1,3)]
-labs_cr_peak <- merge(labs_cr_peak,labs_peak_offset,by="patient_id",all.x=TRUE)
-labs_cr_peak[3:5] <- labs_cr_peak[3:5]+labs_cr_peak[,6]
-colnames(labs_cr_peak)[3] <- "days_since_admission"
-# Now we have the peak Cr, start and end times of the peaks, and the time of the maximum Cr all stored in labs_cr_peak
+# Now we are going to generate the start days of each AKI
+labs_cr_aki_tmp <- labs_cr_aki
+labs_cr_aki_tmp$valid = 1
 
-# At this point, our table has these headers:
-# patient_id  site_id  days_since_admission  value min_cr_7day min_cr_48h  min_cr_7day_retro min_cr_48h_retro  cr_7d cr_90d aki_kdigo aki_kdigo_retro aki_kdigo_final akd_7d  akd_90d delta_cr
+# Find the day of the minimum Cr used for grading AKIs (taken as baseline)
+labs_cr_aki_tmp <- labs_cr_aki_tmp %>% group_by(patient_id) %>% complete(days_since_admission = full_seq(days_since_admission,1)) %>% mutate(value = na.fill(value,Inf))
+labs_cr_aki_tmp2 <- labs_cr_aki_tmp
+labs_cr_aki_tmp3 <- labs_cr_aki_tmp
+labs_cr_aki_tmp2 <- labs_cr_aki_tmp2 %>% split(.$patient_id) %>% map(~pos_min(.$value,.$days_since_admission)) %>% map_df(~data_frame(.x),.id='patient_id')
+colnames(labs_cr_aki_tmp2)[2] <- "day_min"
+labs_cr_aki_tmp3 <- labs_cr_aki_tmp3 %>% split(.$patient_id) %>% map(~pos_min(.$value,.$days_since_admission,lag=FALSE)) %>% map_df(~data_frame(.x),.id='patient_id')
+colnames(labs_cr_aki_tmp3)[2] <- "day_min_retro"
+labs_cr_aki_tmp4 <- cbind(labs_cr_aki_tmp,"day_min" = labs_cr_aki_tmp2$day_min,"day_min_retro" = labs_cr_aki_tmp3$day_min_retro)
+labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[!is.na(labs_cr_aki_tmp4$valid),]
 
-# Now to generate a table with the AKI peak data (absolute Cr values for peak, baseline, increment, Cr in 7 days and 
-# 90 days post-peak, and start and end of each AKI episode)
-labs_aki_summ <- labs_cr_aki
-labs_aki_summ$baseline_cr <- labs_aki_summ$value - labs_aki_summ$delta_cr
-# Clean up the data to have fewer columns
-labs_aki_summ <- labs_aki_summ[,-c(5:8,11,12)]
-labs_aki_summ <- labs_aki_summ[,c(1:3,11,4,10,5:9)]
-colnames(labs_aki_summ)[5] <- "peak_cr"
-# Merge in peak start and end data and filter those with valid peak data 
-# - these are more likely to reflect true AKIs
-labs_aki_summ <- merge(labs_aki_summ,labs_cr_peak,by=c("patient_id","peak_cr","days_since_admission"),all.x=TRUE)
-# patient_id  peak_cr days_since_admission  site_id baseline_cr  delta_cr cr_7d cr_90d aki_kdigo_final akd_7d  akd_90d  index_start index_end
-labs_aki_summ <- labs_aki_summ[,c(1,4,3,2,5:13)]
-labs_aki_summ <- labs_aki_summ[!is.na(labs_aki_summ$index_start),]
-labs_aki_summ <- labs_aki_summ[order(labs_aki_summ$patient_id,labs_aki_summ$days_since_admission),]
-# Apply filter to remove events which do not fulfill KDIGO criteria
-labs_aki_summ <- labs_aki_summ[labs_aki_summ$aki_kdigo_final >= 1,]
-colnames(labs_aki_summ)[12] <- "aki_start"
-colnames(labs_aki_summ)[13] <- "aki_end"
+# Generate delta_cr
+labs_cr_aki_tmp4 <- labs_cr_aki_tmp4 %>% group_by(patient_id,days_since_admission) %>% mutate(min_cr_7d_final = min(min_cr_7day,min_cr_7day_retro)) %>% mutate(delta_cr = value - min_cr_7d_final)
+
+# Use the largest delta_cr to find the peak of each AKI
+labs_cr_aki_delta_maxima <- labs_cr_aki_tmp4 %>% group_by(patient_id) %>% summarise(days_since_admission=days_since_admission[which.peaks(delta_cr,decreasing=FALSE)],delta_maxima = delta_cr[which.peaks(delta_cr,decreasing=FALSE)])
+labs_cr_aki_delta_maxima$delta_is_max = 1
+labs_cr_aki_tmp4 <- merge(labs_cr_aki_tmp4,labs_cr_aki_delta_maxima,by=c("patient_id","days_since_admission"),all.x=TRUE)
+
+# Filter for KDIGO grades > 0
+labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[labs_cr_aki_tmp5$aki_kdigo_final > 0,]
+labs_cr_aki_tmp4[is.na(labs_cr_aki_tmp4)] <- 0
+# Filter for maxima of delta_cr (which should give us the peaks)
+labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[labs_cr_aki_tmp4$delta_is_max > 0,]
+
+# Filter and reorder columns to generate our final table of all AKI events
+labs_aki_summ <- labs_cr_aki_tmp4 %>% select(patient_id,site_id,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d)
+
+# Remove our temporary tables (comment these out to check output)
+rm(labs_cr_aki_tmp)
+rm(labs_cr_aki_tmp2)
+rm(labs_cr_aki_tmp3)
+rm(labs_cr_aki_tmp4)
+
 # Final headers for labs_aki_summ:
-# patient_id site_id days_since_admission  peak_cr  baseline_cr delta_cr  cr_7d cr_90d  aki_kdigo_final akd_7d  akd_90d  aki_start aki_end
+# patient_id,site_id,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d
 # days_since_admission - time at which peak Cr is achieved
-# aki_start - time at which Cr begins to rise
-# aki_end - time at which Cr goes back to baseline / before the start of next AKI
+# day_min - time at which Cr begins to rise
 
 # We also want to generate tables to determine (1) if AKIs occurred before/after severe disease onset 
 # (2) how long before/after disease severity
@@ -230,7 +260,7 @@ labs_aki_severe <- merge(labs_aki_summ,severe_time,by="patient_id",all.x=TRUE)
 labs_aki_severe <- labs_aki_severe %>% group_by(patient_id) %>% mutate(severe_to_aki = ifelse(time_to_severe != -999, time_to_severe - aki_start,-999)) %>% ungroup()
 labs_aki_severe <- labs_aki_severe %>% group_by(patient_id) %>% mutate(severe_before_aki = ifelse(severe_to_aki < 0,1,0)) %>% ungroup()
 # Final headers for labs_aki_severe:
-# patient_id site_id days_since_admission  peak_cr  baseline_cr delta_cr  cr_7d cr_90d  aki_kdigo_final akd_7d  akd_90d  aki_start aki_end  time_to_severe  severe_to_aki severe_before_aki
+# patient_id,site_id,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d  time_to_severe  severe_to_aki severe_before_aki
 
 # Save the generated AKI tables for future reference
 write.csv(labs_aki_summ,"PatientAKIEvents.csv",row.names=FALSE)
