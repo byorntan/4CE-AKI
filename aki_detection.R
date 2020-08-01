@@ -257,7 +257,7 @@ rm(labs_cr_aki_tmp4)
 # These tables will help in segregating the populations for analysis later
 severe_time <- demographics_filt[,c(1,8)]
 labs_aki_severe <- merge(labs_aki_summ,severe_time,by="patient_id",all.x=TRUE)
-labs_aki_severe <- labs_aki_severe %>% group_by(patient_id) %>% mutate(severe_to_aki = ifelse(time_to_severe != -999, time_to_severe - aki_start,-999)) %>% ungroup()
+labs_aki_severe <- labs_aki_severe %>% group_by(patient_id) %>% mutate(severe_to_aki = ifelse(time_to_severe != -999, time_to_severe - day_min,-999)) %>% ungroup()
 labs_aki_severe <- labs_aki_severe %>% group_by(patient_id) %>% mutate(severe_before_aki = ifelse(severe_to_aki < 0,1,0)) %>% ungroup()
 # Final headers for labs_aki_severe:
 # patient_id,site_id,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d  time_to_severe  severe_to_aki severe_before_aki

@@ -13,12 +13,14 @@ library(dplyr)
 # Feel free to modify the code to look at other types of AKI episodes, e.g. you can filter for the most severe AKI episode
 # First, filter the labs_aki_severe table to show only the index AKI episodes
 aki_index <- labs_aki_severe %>% group_by(patient_id) %>% filter(days_since_admission == min(days_since_admission)) %>% ungroup()
-# patient_id site_id days_since_admission  peak_cr  baseline_cr delta_cr  cr_7d cr_90d  aki_kdigo_final akd_7d  akd_90d  aki_start aki_end  time_to_severe  severe_to_aki severe_before_aki
+# patient_id	site_id	days_since_admission	value	day_min	day_min_retro	min_cr_7day	min_cr_48h	min_cr_7day_retro	min_cr_48h_retro	min_cr_7d_final	cr_7d	cr_90d	delta_cr	aki_kdigo	aki_kdigo_retro	aki_kdigo_final	akd_7d	akd_90d	time_to_severe	severe_to_aki	severe_before_aki
+
 # Generate the patient list including (1) severity indices from this filtered table (2) day of peak Cr
 # severe - 2 = never severe, 4 = severe, AKI before severity onset, 5 = severe, AKI after severity onset
 aki_index <- aki_index %>% group_by(patient_id) %>% mutate(severe = ifelse(time_to_severe != -999,ifelse(severe_before_aki == 1,5,4),2)) %>% ungroup()
-aki_index <- aki_index[,c(1,3,17,12)]
+aki_index <- aki_index[,c(1,3,23,5)]
 colnames(aki_index)[2] <- "peak_cr_time"
+colnames(aki_index)[4] <- "aki_start"
 # Headers of aki_index: patient_id  peak_cr_time  severe  aki_start
 
 no_aki_list <- demographics_filt[,c(1,7)]
