@@ -52,10 +52,10 @@ akd_grade_7d <- function(x) {
   baseline_7d_retro = as.numeric(x[7])
   baseline_48h_retro = as.numeric(x[8])
   baseline = min(baseline_7d,baseline_48h,baseline_7d_retro,baseline_48h_retro)
-  cr_7d = as.numeric(x[9])
+  cr_7d = as.numeric(x[14])
   grade = 0
-  ratio = round(creat/baseline,2)
-  diff = creat - baseline
+  ratio = round(cr_7d/baseline,2)
+  diff = cr_7d - baseline
   # We will code grade B/C as 0.5
   if(ratio > 1.25) {
     grade = 0.5
@@ -79,10 +79,10 @@ akd_grade_90d <- function(x) {
   baseline_7d_retro = as.numeric(x[7])
   baseline_48h_retro = as.numeric(x[8])
   baseline = min(baseline_7d,baseline_48h,baseline_7d_retro,baseline_48h_retro)
-  cr_90d = as.numeric(x[10])
+  cr_90d = as.numeric(x[15])
   grade = 0
-  ratio = round(creat/baseline,2)
-  diff = creat - baseline
+  ratio = round(cr_90d/baseline,2)
+  diff = cr_90d - baseline
   # We will code grade B/C as 0.5
   if(ratio > 1.25) {
     grade = 0.5
