@@ -192,7 +192,7 @@ labs_cr_aki <- labs_cr_aki %>% group_by(patient_id) %>% mutate(min_cr_48h_retro 
 #    Nephrology 8, 194-202 (2013). https://doi.org/10.2215/CJN.06480612
 
 # Generate sCr levels at +7d (cr_7d) and +90d (cr_90d) timepoints (for determining post-AKI recovery, AKD)
-labs_cr_aki <- setDT(labs_cr_aki)[,':='(cr_7d = tail(labs_cr_aki$value[labs_cr_aki$patient_id==patient_id][between(labs_cr_aki$days_since_admission[labs_cr_aki$patient_id==patient_id],days_since_admission,days_since_admission+7,incbounds = TRUE)],1),cr_90d = tail(labs_cr_aki$value[labs_cr_aki$patient_id==patient_id][between(labs_cr_aki$days_since_admission[labs_cr_aki_rv$patient_id==patient_id],days_since_admission,days_since_admission+90,incbounds = TRUE)],1)),by=c('patient_id','days_since_admission')][]
+labs_cr_aki <- setDT(labs_cr_aki)[,':='(cr_7d = tail(labs_cr_aki$value[labs_cr_aki$patient_id==patient_id][between(labs_cr_aki$days_since_admission[labs_cr_aki$patient_id==patient_id],days_since_admission,days_since_admission+7,incbounds = TRUE)],1),cr_90d = tail(labs_cr_aki$value[labs_cr_aki$patient_id==patient_id][between(labs_cr_aki$days_since_admission[labs_cr_aki$patient_id==patient_id],days_since_admission,days_since_admission+90,incbounds = TRUE)],1)),by=c('patient_id','days_since_admission')][]
 
 # At this point, our table has these headers:
 # patient_id  site_id  days_since_admission  value min_cr_7day min_cr_48h  min_cr_7day_retro min_cr_48h_retro  cr_7d cr_90d
@@ -233,7 +233,7 @@ labs_cr_aki_delta_maxima$delta_is_max = 1
 labs_cr_aki_tmp4 <- merge(labs_cr_aki_tmp4,labs_cr_aki_delta_maxima,by=c("patient_id","days_since_admission"),all.x=TRUE)
 
 # Filter for KDIGO grades > 0
-labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[labs_cr_aki_tmp5$aki_kdigo_final > 0,]
+labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[labs_cr_aki_tmp4$aki_kdigo_final > 0,]
 labs_cr_aki_tmp4[is.na(labs_cr_aki_tmp4)] <- 0
 # Filter for maxima of delta_cr (which should give us the peaks)
 labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[labs_cr_aki_tmp4$delta_is_max > 0,]
