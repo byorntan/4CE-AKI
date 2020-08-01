@@ -5,8 +5,8 @@ This is a works-in-progress - the script that I have written to process the Phas
 ## Milestones achieved
 1) Detection of AKI using serum Cr trends
    - Using a rolling time window and KDIGO criteria with the minimum serum Cr in the time window as the baseline Cr
-   - Using pracma::findpeaks() to detect peaks in Cr and then matching these peaks against the earlier rolling-window-based method to detect true serum Cr peaks
 2) Generating graphs of serum Cr trends with ggplot2
+3) Plotting probability density function plots of time form severity onset to AKI
 
 ## Future Directions
 1) Generate a model (starting with GLM-based models) to predict the following:
@@ -15,12 +15,12 @@ This is a works-in-progress - the script that I have written to process the Phas
    - COVID-19 severity using AKI characteristics
 
 ## System Prerequisites
-1) R 3.6 or greater (ideally)
+1) R 3.6 or greater (ideally - most of the code was written on R 4.0 although it has been known to work on 3.5.1)
 2) Following R packages must be installed:
    - dplyr, tidyr, purrr, ggplot2 (all are part of the tidyverse package)
+   - plyr
    - data.table
    - zoo
-   - pracma
    - RcppRoll
 
 ## Additional Files Required
@@ -53,4 +53,5 @@ description: String of diagnosis (for easier readability)
    - aki_detection.R
    - medications.R
    - figure1_cr_trends.R
+   - figure2_probability_density_plot.R
 3) Run the main script "run_aki_analysis.R"
