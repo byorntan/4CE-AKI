@@ -18,6 +18,11 @@ med_chronic$present <- 1
 med_chronic <- spread(med_chronic,concept_code,present)
 med_chronic[is.na(med_chronic)] <- 0
 
+# Create subtable for ACE-i/ARB pre-exposure
+med_acearb_chronic <- med_chronic %>% select(patient_id,old_ACEI,old_ARB)
+med_acearb_chronic <- med_acearb_chronic %>% group_by(patient_id) %>% mutate(acei_arb_preexposure = ifelse(old_ACEI + old_ARB > 0,1,0))
+med_acearb_chronic <- med_acearb_chronic %>% select(patient_id,acei_arb_preexposure)
+
 # For simplicity of initial analysis, we will use the earliest date where each new medication class is
 # used. However, if we are to incorporate a recurrent neural network model to account for temporal changes
 # in medications, this approach cannot be used.
@@ -40,3 +45,14 @@ med_new_aki[is.na(med_new_aki)] <- -999
 # Generate another table with the start date of the new medications
 med_new <- spread(med_new,concept_code,start_day)
 med_new[is.na(med_new)] <- -999
+
+# Generate simplified table for determining who were started on COAGB near admission
+med_coagb_new <- med_new %>% select(patient_id,COAGB)
+med_coagb_new$COAGB[med_coagb_new$COAGB < -15] <- 0
+med_coagb_new$COAGB[med_coagb_new$COAGB >= -15] <- 1
+
+# Generate simplified table for determining who were started on novel antivirals in <= 72h from admission
+med_covid19_new <- med_new %>% select(patient_id,COVIDVIRAL,HCQ)
+med_covid19_new <- med_covid19_new[med_covid19_new$COVIDVIRAL <= 3 | med_covid19_new$HCQ <= 3,]
+med_covid19_new <- med_covid19_new %>% group_by(patient_id) %>% mutate(covid_rx = ifelse(COVIDVIRAL + HCQ > 0,1,0))
+med_covid19_new <- med_covid19_new %>% select(patient_id,covid_rx)
