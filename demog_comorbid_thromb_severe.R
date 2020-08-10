@@ -97,7 +97,7 @@ rrt <- rrt[!duplicated(rrt$patient_id),]
 
 # Generate list of patients already on RRT prior to admission
 # This list can be used to exclude ESRF patients in subsequent analyses
-patients_already_rrt <- rrt$patient_id[rrt$days_since_admission < 0,1]
+patients_already_rrt <- rrt$patient_id[rrt$days_since_admission < 0]
 
 # Generate list of patients who were only initiated on RRT for the first time ever
 # during admission for COVID-19
