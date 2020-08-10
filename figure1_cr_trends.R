@@ -24,7 +24,7 @@ colnames(aki_only_index)[4] <- "aki_start"
 # Headers of aki_only_index: patient_id  peak_cr_time  severe  aki_start  severe_to_aki
 
 no_aki_list <- demographics_filt[,c(1,7)]
-no_aki_list <- no_aki_list[!(no_aki_list$patient_id %in% aki_index$patient_id),]
+no_aki_list <- no_aki_list[!(no_aki_list$patient_id %in% aki_only_index$patient_id),]
 no_aki_list <- no_aki_list %>% group_by(patient_id) %>% mutate(severe = ifelse(severe == 1,3,1))
 no_aki_list$peak_cr_time <- 0
 no_aki_list$aki_start <- 0
@@ -45,8 +45,8 @@ peak_aki_trend <- peak_aki_trend %>% group_by(patient_id) %>% mutate(time_from_p
 peak_aki_trend <- peak_aki_trend %>% group_by(patient_id) %>% filter(between(time_from_peak,0,7)) %>% ungroup()
 # Normalise to baseline values used for AKI calculation
 peak_aki_trend <- peak_aki_trend %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_7day,min_cr_7day_retro)) %>% ungroup()
-peak_aki_trend <- peak_aki_timeplot %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
-peak_aki_trend <- peak_aki_trend[,c(1,2,9,11)]
+peak_aki_trend <- peak_aki_trend %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
+peak_aki_trend <- peak_aki_trend %>% select(patient_id,severe,time_from_peak,ratio)
 # Headers: patient_id  severe  time_from_peak  ratio
 
 # Calculate mean and SD each for severe and non-severe groups
