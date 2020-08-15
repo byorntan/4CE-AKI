@@ -13,7 +13,7 @@ med_new <- medications[medications$days_since_admission >= -15,]
 # Re-code chronic medications into wide format
 med_chronic <- med_chronic[!duplicated(med_chronic[,c(1,2,4)]),]
 med_chronic <- med_chronic[,-c(2,3)]
-med_chronic$concept_code <- paste(med_chronic$concept_code,"old",sep="_")
+med_chronic$concept_code <- paste("old",med_chronic$concept_code,sep="_")
 med_chronic$present <- 1
 med_chronic <- spread(med_chronic,concept_code,present)
 med_chronic[is.na(med_chronic)] <- 0

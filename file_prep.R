@@ -35,9 +35,9 @@ comorbid_icd9_ref <- comorbid_ref[comorbid_ref$icd_version == "DIAG-ICD9",-c(1,4
 comorbid_icd10_ref <- comorbid_ref[comorbid_ref$icd_version == "DIAG-ICD10",-c(1,4)]
 
 # first generate a unique ID for each patient
-demographics <- demographics %>% mutate(patient_id=paste(site_id,patient_num,sep="_"))
-course <- course %>% mutate(patient_id=paste(site_id,patient_num,sep="_"))
-observations <- observations %>% mutate(patient_id=paste(site_id,patient_num,sep="_"))
+demographics <- demographics %>% mutate(patient_id=paste(siteid,patient_num,sep="_"))
+course <- course %>% mutate(patient_id=paste(siteid,patient_num,sep="_"))
+observations <- observations %>% mutate(patient_id=paste(siteid,patient_num,sep="_"))
 
 # From this point on, we will be using our custom-generated patient_id as a unique patient identifier
 # Reorder the columns in each table to bring patient_id to the first column and remove patient_num

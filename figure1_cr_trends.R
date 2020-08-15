@@ -33,6 +33,9 @@ no_aki_list <- no_aki_list[,c(1,3,2,4,5)]
 
 aki_index <- bind_rows(aki_only_index,no_aki_list)
 
+# Uncomment the following line to remove patients who were previously on RRT prior to admission
+# aki_index <- aki_index[!(aki_index$patient_id %in% patients_already_rrt),]
+
 # Now bind this list of days of peak Cr to a new table containing the Cr trends
 peak_aki_trend <- labs_cr_aki[,c(1,3,4,5,7)]
 peak_aki_trend <- merge(peak_aki_trend,aki_index,by="patient_id",all.x=TRUE)
