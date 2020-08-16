@@ -52,7 +52,7 @@ akd_grade_7d <- function(x) {
   baseline_7d_retro = as.numeric(x[7])
   baseline_48h_retro = as.numeric(x[8])
   baseline = min(baseline_7d,baseline_48h,baseline_7d_retro,baseline_48h_retro)
-  cr_7d = as.numeric(x[14])
+  cr_7d = as.numeric(x[9])
   grade = 0
   ratio = round(cr_7d/baseline,2)
   diff = cr_7d - baseline
@@ -79,7 +79,7 @@ akd_grade_90d <- function(x) {
   baseline_7d_retro = as.numeric(x[7])
   baseline_48h_retro = as.numeric(x[8])
   baseline = min(baseline_7d,baseline_48h,baseline_7d_retro,baseline_48h_retro)
-  cr_90d = as.numeric(x[15])
+  cr_90d = as.numeric(x[10])
   grade = 0
   ratio = round(cr_90d/baseline,2)
   diff = cr_90d - baseline
