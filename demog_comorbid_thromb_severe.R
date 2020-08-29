@@ -10,7 +10,7 @@ demographics_filt <- demographics_filt %>% mutate(time_to_death = ifelse(decease
 demographics_filt <- demographics_filt %>% mutate(length_stay = ifelse(still_in_hospital==1,days_since_admission,last_discharge_date - admission_date))
 
 # Reorder the columns to be more readable
-demographics_filt <- demographics_filt[,c(1,2,11:13,17,8,15,10,16)]
+demographics_filt <- demographics_filt %>% select(patient_id,siteid,sex,age_group,race,length_stay,severe,time_to_severe,deceased,time_to_death)
 
 # Final headers for demographics_filt
 # patient_id  site_id sex age_group race  length_stay severe  time_to_severe  deceased  time_to_death

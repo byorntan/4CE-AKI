@@ -141,3 +141,25 @@ cr_from_covidrx_summ <- cr_from_covidrx_trend_severe %>% group_by(severe,time_fr
 cr_from_covidrx_timeplot <- ggplot(cr_from_covidrx_summ,aes(x=time_from_covidrx,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from COVIDVIRAL Start",y = "Serum Cr/Baseline Cr", color = "Severity")
 print(cr_from_covidrx_timeplot)
 
+# ============================================================================================
+# Figure 1(c) Comparing AKI plots for patients with CKD vs non-CKD (eGFR >= 60 vs eGFR < 60)
+# ============================================================================================
+# Works in progress as exact age is not available in data extracted for Phase 2.0 (only broad age groups)
+egdr_ckdepi <- function(sex,age,race=0,creatinine) {
+  creatinine <- creatinine * 0.0113 #convert to mg/dL for formula
+  race_factor = 1
+  sex_factor = 1
+  k_factor = 0.9
+  a_factor = -0.411
+  if(race == 1) {
+    race_factor <- 1.159
+  }
+  if(sex == 1) {
+    sex_factor <- 1.018
+    k_factor <- 0.7
+    a_factor <- -0.329
+  }
+  egfr <- 141 * (min(creatinine/k_factor,1))^a_factor * (max(creatinine/k_factor,1))^(-1.209) * 0.993^age * sex_factor * race_factor
+  return(egfr)
+}
+
