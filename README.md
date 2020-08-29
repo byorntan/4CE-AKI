@@ -6,6 +6,8 @@ This is a works-in-progress - the script that I have written to process the Phas
 1) Detection of AKI using serum Cr trends
    - Using a rolling time window and KDIGO criteria with the minimum serum Cr in the time window as the baseline Cr
 2) Generating graphs of serum Cr trends with ggplot2
+   - Plotting serum Cr trends of patients with/without AKI and severity
+   - Plotting serum Cr trends of patients with/without remdesivir/lopinavir+ritonavir use and severity
 3) Plotting probability density function plots of time form severity onset to AKI
 
 ## Future Directions
