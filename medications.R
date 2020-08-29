@@ -51,8 +51,11 @@ med_coagb_new <- med_new %>% select(patient_id,COAGB)
 med_coagb_new$COAGB[med_coagb_new$COAGB < -15] <- 0
 med_coagb_new$COAGB[med_coagb_new$COAGB >= -15] <- 1
 
-# Generate simplified table for determining who were started on novel antivirals in <= 72h from admission
-med_covid19_new <- med_new %>% select(patient_id,COVIDVIRAL,HCQ)
-med_covid19_new <- med_covid19_new[med_covid19_new$COVIDVIRAL <= 3 | med_covid19_new$HCQ <= 3,]
-med_covid19_new <- med_covid19_new %>% group_by(patient_id) %>% mutate(covid_rx = ifelse(COVIDVIRAL + HCQ > 0,1,0))
+# Generate simplified table for determining who were started on novel antivirals
+med_covid19_new <- med_new %>% select(patient_id,COVIDVIRAL)
+# Uncomment following line to select for patients who were started on novel antivirals less than 72h from admission
+#med_covid19_new <- med_covid19_new[med_covid19_new$COVIDVIRAL <= 3,]
+med_covid19_new <- med_covid19_new %>% group_by(patient_id) %>% mutate(covid_rx = ifelse(COVIDVIRAL >= 0,1,0))
+med_covid19_new_date <- med_covid19_new
+colnames(med_covid19_new_date)[2] <- "covid_rx_start"
 med_covid19_new <- med_covid19_new %>% select(patient_id,covid_rx)

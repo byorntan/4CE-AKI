@@ -195,7 +195,7 @@ labs_cr_aki <- labs_cr_aki %>% group_by(patient_id) %>% mutate(min_cr_48h_retro 
 labs_cr_aki <- setDT(labs_cr_aki)[,':='(cr_7d = tail(labs_cr_aki$value[labs_cr_aki$patient_id==patient_id][between(labs_cr_aki$days_since_admission[labs_cr_aki$patient_id==patient_id],days_since_admission,days_since_admission+7,incbounds = TRUE)],1),cr_90d = tail(labs_cr_aki$value[labs_cr_aki$patient_id==patient_id][between(labs_cr_aki$days_since_admission[labs_cr_aki$patient_id==patient_id],days_since_admission,days_since_admission+90,incbounds = TRUE)],1)),by=c('patient_id','days_since_admission')][]
 
 # At this point, our table has these headers:
-# patient_id  site_id  days_since_admission  value min_cr_7day min_cr_48h  min_cr_7day_retro min_cr_48h_retro  cr_7d cr_90d
+# patient_id  siteid  days_since_admission  value min_cr_7day min_cr_48h  min_cr_7day_retro min_cr_48h_retro  cr_7d cr_90d
 
 # Now we have to start grading AKI severity at each time point
 # This approach is similar to how the MIMIC-III dataset generates AKI severity
@@ -232,6 +232,12 @@ labs_cr_aki_delta_maxima <- labs_cr_aki_tmp4 %>% group_by(patient_id) %>% summar
 labs_cr_aki_delta_maxima$delta_is_max = 1
 labs_cr_aki_tmp4 <- merge(labs_cr_aki_tmp4,labs_cr_aki_delta_maxima,by=c("patient_id","days_since_admission"),all.x=TRUE)
 
+# Generate a separate table (for reference) of all creatinine peaks not fulfilling KDIGO AKI criteria
+labs_cr_nonaki <- labs_cr_aki_tmp4[labs_cr_aki_tmp4$aki_kdigo_final == 0,]
+labs_cr_nonaki[is.na(labs_cr_nonaki)] <- 0
+labs_cr_nonaki <- labs_cr_nonaki[labs_cr_nonaki$delta_is_max > 0,]
+labs_cr_nonaki <- labs_cr_nonaki %>% select(patient_id,siteid,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d)
+
 # Filter for KDIGO grades > 0
 labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[labs_cr_aki_tmp4$aki_kdigo_final > 0,]
 labs_cr_aki_tmp4[is.na(labs_cr_aki_tmp4)] <- 0
@@ -239,7 +245,7 @@ labs_cr_aki_tmp4[is.na(labs_cr_aki_tmp4)] <- 0
 labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[labs_cr_aki_tmp4$delta_is_max > 0,]
 
 # Filter and reorder columns to generate our final table of all AKI events
-labs_aki_summ <- labs_cr_aki_tmp4 %>% select(patient_id,site_id,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d)
+labs_aki_summ <- labs_cr_aki_tmp4 %>% select(patient_id,siteid,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d)
 
 # Remove our temporary tables (comment these out to check output)
 rm(labs_cr_aki_tmp)
@@ -248,19 +254,26 @@ rm(labs_cr_aki_tmp3)
 rm(labs_cr_aki_tmp4)
 
 # Final headers for labs_aki_summ:
-# patient_id,site_id,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d
+# patient_id,siteid,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d
 # days_since_admission - time at which peak Cr is achieved
 # day_min - time at which Cr begins to rise
+
+# Generate the highest Cr peak for non-AKI peaks detected
+labs_nonaki_summ <- labs_cr_nonaki %>% group_by(patient_id) %>% slice(which.max(delta_cr))
 
 # We also want to generate tables to determine (1) if AKIs occurred before/after severe disease onset 
 # (2) how long before/after disease severity
 # These tables will help in segregating the populations for analysis later
-severe_time <- demographics_filt[,c(1,8)]
+severe_time <- demographics_filt %>% select(patient_id,severe,time_to_severe)
 labs_aki_severe <- merge(labs_aki_summ,severe_time,by="patient_id",all.x=TRUE)
 labs_aki_severe <- labs_aki_severe %>% group_by(patient_id) %>% mutate(severe_to_aki = ifelse(time_to_severe != -999, time_to_severe - day_min,-999)) %>% ungroup()
 labs_aki_severe <- labs_aki_severe %>% group_by(patient_id) %>% mutate(severe_before_aki = ifelse(severe_to_aki < 0,1,0)) %>% ungroup()
 # Final headers for labs_aki_severe:
-# patient_id,site_id,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d  time_to_severe  severe_to_aki severe_before_aki
+# patient_id,siteid,days_since_admission,value,day_min,day_min_retro,min_cr_7day,min_cr_48h,min_cr_7day_retro,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d  severe time_to_severe  severe_to_aki severe_before_aki
+
+labs_nonaki_severe <- merge(labs_nonaki_summ,severe_time,by="patient_id",all.x=TRUE)
+labs_nonaki_severe$severe_to_aki <- -999 
+labs_nonaki_severe$severe_before_aki <- 1 
 
 # Save the generated AKI tables for future reference
 write.csv(labs_aki_summ,"PatientAKIEvents.csv",row.names=FALSE)
