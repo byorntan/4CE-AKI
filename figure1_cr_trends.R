@@ -46,7 +46,7 @@ no_aki_index$severe_to_aki <- -999
 aki_index <- bind_rows(aki_only_index,no_aki_index)
 
 aki_index <- merge(aki_index,med_covid19_new,by="patient_id",all.x=TRUE)
-aki_index$covidrx[is.na(aki_index$covid_rx)] <- 0
+aki_index$covid_rx[is.na(aki_index$covid_rx)] <- 0
 aki_index <- aki_index %>% group_by(patient_id) %>% mutate(covidrx_grp = ifelse(severe <= 2, ifelse(covid_rx == 0,1,2),ifelse(covid_rx == 0,3,4))) %>% ungroup()
 aki_index <- aki_index %>% select(patient_id,peak_cr_time,severe,aki_start,severe_to_aki,covidrx_grp)
 # Headers of aki_index: patient_id  peak_cr_time  severe  aki_start  severe_to_aki  covidrx_grp
@@ -55,15 +55,15 @@ aki_index <- aki_index %>% select(patient_id,peak_cr_time,severe,aki_start,sever
 # aki_index <- aki_index[!(aki_index$patient_id %in% patients_already_rrt),]
 
 # Create a common labs_cr_all table containing the serum Cr values, the severity groupings and anti-viral groupings
-labs_cr_aki_tmp <- labs_cr_aki %>% select(patient_id,days_since_admission,value,day_min,min_cr_7day)
-labs_cr_nonaki_tmp <- labs_cr_nonaki %>% select(patient_id,days_since_admission,value,day_min,min_cr_7day)
+labs_cr_aki_tmp <- labs_cr_aki %>% select(patient_id,days_since_admission,value,min_cr_7day,min_cr_7day_retro)
+labs_cr_nonaki_tmp <- labs_cr_nonaki %>% select(patient_id,days_since_admission,value,min_cr_7day,min_cr_7day_retro)
 labs_cr_all <- bind_rows(labs_cr_aki_tmp,labs_cr_nonaki_tmp)
 labs_cr_all <- merge(labs_cr_all,aki_index,by="patient_id",all.x=TRUE)
 
 # Now, generate a table containing lab values with timepoints calculated from time of peak cr
 peak_trend <- labs_cr_all
 peak_trend <- peak_trend %>% select(patient_id,severe,covidrx_grp,days_since_admission,peak_cr_time,value,min_cr_7day,min_cr_7day_retro)
-# patient_id  severe  covidrx_grp  days_since_admission  peak_cr_time  value min_cr_7day min_cr_7day_retro severe_to_aki
+# patient_id  severe  covidrx_grp  days_since_admission  peak_cr_time  value min_cr_7day min_cr_7day_retro
 
 # Calculate the day from peak Cr
 peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(time_from_peak = days_since_admission - peak_cr_time) %>% ungroup()
@@ -126,6 +126,11 @@ print(peak_cr_covidviral_timeplot)
 
 # Plotting from initiation of novel anti-virals
 cr_from_covidrx_trend <- merge(peak_trend,med_covid19_new_date,by="patient_id",all.x=TRUE)
+# Filter out patients who have never received any of the novel antivirals
+cr_from_covidrx_trend$covid_rx_start[is.na(cr_from_covidrx_trend$covid_rx_start)] <- -999
+cr_from_covidrx_trend$covid_rx[is.na(cr_from_covidrx_trend$covid_rx)] <- 0
+cr_from_covidrx_trend <- cr_from_covidrx_trend[cr_from_covidrx_trend$covid_rx == 1,]
+
 cr_from_covidrx_trend <- cr_from_covidrx_trend %>% select(patient_id,severe,covidrx_grp,days_since_admission,covid_rx_start,peak_cr_time,value,min_cr_7day,min_cr_7day_retro)
 cr_from_covidrx_trend <- cr_from_covidrx_trend %>% group_by(patient_id) %>% mutate(severe = ifelse(severe <= 2,0,1)) %>% mutate(covidrx_grp = ifelse((covidrx_grp == 2 || covidrx_grp == 4),1,0)) %>% ungroup()
 # Calculate the day from initiation of novel anti-virals

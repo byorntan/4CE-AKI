@@ -5,9 +5,9 @@ library(tidyr)
 # ==============
 # We want to calculate (1) time to severe event (2) time to death
 # We can use Kaplan-Meier curves to determine associated with these severe events
-demographics_filt <- demographics %>% mutate(time_to_severe = ifelse(severe == 1, severe_date - admission_date,-999))
-demographics_filt <- demographics_filt %>% mutate(time_to_death = ifelse(deceased == 1, death_date - admission_date,-1))
-demographics_filt <- demographics_filt %>% mutate(length_stay = ifelse(still_in_hospital==1,days_since_admission,last_discharge_date - admission_date))
+demographics_filt <- demographics %>% mutate(time_to_severe = ifelse(severe == 1, as.numeric(as.Date(severe_date) - as.Date(admission_date)),-999))
+demographics_filt <- demographics_filt %>% mutate(time_to_death = ifelse(deceased == 1, as.numeric(as.Date(death_date) - as.Date(admission_date)),-1))
+demographics_filt <- demographics_filt %>% mutate(length_stay = ifelse(still_in_hospital==1,days_since_admission,as.numeric(as.Date(last_discharge_date) - as.Date(admission_date))))
 
 # Reorder the columns to be more readable
 demographics_filt <- demographics_filt %>% select(patient_id,siteid,sex,age_group,race,length_stay,severe,time_to_severe,deceased,time_to_death)
@@ -18,39 +18,39 @@ demographics_filt <- demographics_filt %>% select(patient_id,siteid,sex,age_grou
 # ======================================
 # Comorbidities & Prothrombotic Events
 # ======================================
-diag_icd9 <- diagnosis[diagnosis$concept_type == "DIAG-ICD9",]
-diag_icd10 <- diagnosis[diagnosis$concept_type == "DIAG-ICD10",]
-
-# Filter comorbids from all diagnoses
-comorbid_icd9 <- diag_icd9[diag_icd9$concept_code %in% comorbid_icd9_ref$icd_code,]
-comorbid_icd10 <- diag_icd10[diag_icd10$concept_code %in% comorbid_icd10_ref$icd_code,]
-# Filter comorbids to be restricted to diagnosis codes made -15days
-comorbid_icd9 <- comorbid_icd9[comorbid_icd9$days_since_admission < -15,-c(2:4)]
-comorbid_icd10 <- comorbid_icd10[comorbid_icd10$days_since_admission < -15,-c(2:4)]
-# Map the comorbid codes
-comorbid_icd9 <- merge(comorbid_icd9,comorbid_icd9_ref,by="icd_code",all.x=TRUE)
-comorbid_icd10 <- merge(comorbid_icd10,comorbid_icd10_ref,by="icd_code",all.x=TRUE)
-comorbid <- rbind(comorbid_icd9,comorbid_icd10)
-comorbid <- comorbid[,-2]
-comorbid$present <- 1
-comorbid <- comorbid %>% distinct()
-comorbid <- spread(comorbid,comorbid_type,present)
-comorbid[is.na(comorbid)] <- 0
-
-# Filter prothrombotic events from all diagnoses
-thromb_icd9 <- diag_icd9[diag_icd9$concept_code %in% thromb_icd9_ref$icd_code,]
-thromb_icd10 <- diag_icd10[diag_icd10$concept_code %in% thromb_icd10_ref$icd_code,]
-# Filter prothrombotic diagnoses to be restricted to diagnosis codes made after -15days
-thromb_icd9 <- thromb_icd9[thromb_icd9$days_since_admission >= -15,-c(2,4)]
-thromb_icd10 <- thromb_icd10[thromb_icd10$days_since_admission >= -15,-c(2,4)]
-# Map the prothrombotic codes - store day diagnosed
-thromb_icd9 <- merge(thromb_icd9,thromb_icd9_ref,by="icd_code",all.x=TRUE)
-thromb_icd10 <- merge(thromb_icd10,thromb_icd10_ref,by="icd_code",all.x=TRUE)
-thromb_diag <- rbind(thromb_icd9,thromb_icd10)
-thromb_diag <- thromb_diag[,c(1,4,2)]
-thromb_diag <- thromb_diag %>% distinct()
-thromb_diag <- spread(thromb_diag,type,days_since_admission)
-thromb_diag[is.na(thromb_diag)] <- -999
+# diag_icd9 <- diagnosis[diagnosis$concept_type == "DIAG-ICD9",]
+# diag_icd10 <- diagnosis[diagnosis$concept_type == "DIAG-ICD10",]
+# 
+# # Filter comorbids from all diagnoses
+# comorbid_icd9 <- diag_icd9[diag_icd9$concept_code %in% comorbid_icd9_ref$icd_code,]
+# comorbid_icd10 <- diag_icd10[diag_icd10$concept_code %in% comorbid_icd10_ref$icd_code,]
+# # Filter comorbids to be restricted to diagnosis codes made -15days
+# comorbid_icd9 <- comorbid_icd9[comorbid_icd9$days_since_admission < -15,-c(2:4)]
+# comorbid_icd10 <- comorbid_icd10[comorbid_icd10$days_since_admission < -15,-c(2:4)]
+# # Map the comorbid codes
+# comorbid_icd9 <- merge(comorbid_icd9,comorbid_icd9_ref,by="icd_code",all.x=TRUE)
+# comorbid_icd10 <- merge(comorbid_icd10,comorbid_icd10_ref,by="icd_code",all.x=TRUE)
+# comorbid <- rbind(comorbid_icd9,comorbid_icd10)
+# comorbid <- comorbid[,-2]
+# comorbid$present <- 1
+# comorbid <- comorbid %>% distinct()
+# comorbid <- spread(comorbid,comorbid_type,present)
+# comorbid[is.na(comorbid)] <- 0
+# 
+# # Filter prothrombotic events from all diagnoses
+# thromb_icd9 <- diag_icd9[diag_icd9$concept_code %in% thromb_icd9_ref$icd_code,]
+# thromb_icd10 <- diag_icd10[diag_icd10$concept_code %in% thromb_icd10_ref$icd_code,]
+# # Filter prothrombotic diagnoses to be restricted to diagnosis codes made after -15days
+# thromb_icd9 <- thromb_icd9[thromb_icd9$days_since_admission >= -15,-c(2,4)]
+# thromb_icd10 <- thromb_icd10[thromb_icd10$days_since_admission >= -15,-c(2,4)]
+# # Map the prothrombotic codes - store day diagnosed
+# thromb_icd9 <- merge(thromb_icd9,thromb_icd9_ref,by="icd_code",all.x=TRUE)
+# thromb_icd10 <- merge(thromb_icd10,thromb_icd10_ref,by="icd_code",all.x=TRUE)
+# thromb_diag <- rbind(thromb_icd9,thromb_icd10)
+# thromb_diag <- thromb_diag[,c(1,4,2)]
+# thromb_diag <- thromb_diag %>% distinct()
+# thromb_diag <- spread(thromb_diag,type,days_since_admission)
+# thromb_diag[is.na(thromb_diag)] <- -999
 
 # Final headers for comorbid table
 # Note: order of columns may depend on the overall characteristics of your patient population
