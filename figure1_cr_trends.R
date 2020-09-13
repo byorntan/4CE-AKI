@@ -17,7 +17,7 @@ library(dplyr)
 # Feel free to modify the code to look at other types of AKI episodes, e.g. you can filter for the most severe AKI episode
 # First, filter the labs_aki_severe table to show only the index AKI episodes
 aki_only_index <- labs_aki_severe %>% group_by(patient_id) %>% filter(days_since_admission == min(days_since_admission)) %>% ungroup()
-# patient_id	site_id	days_since_admission	value	day_min	day_min_retro	min_cr_7day	min_cr_48h	min_cr_7day_retro	min_cr_48h_retro	min_cr_7d_final	cr_7d	cr_90d	delta_cr	aki_kdigo	aki_kdigo_retro	aki_kdigo_final	akd_7d	akd_90d	severe  time_to_severe	severe_to_aki	severe_before_aki
+# patient_id	site_id	days_since_admission	value	day_min	day_min_retro	min_cr_90d	min_cr_48h	min_cr_7day_retro	min_cr_48h_retro	min_cr_7d_final	cr_7d	cr_90d	delta_cr	aki_kdigo	aki_kdigo_retro	aki_kdigo_final	akd_7d	akd_90d	severe  time_to_severe	severe_to_aki	severe_before_aki
 
 # Generate the patient list including (1) severity indices from this filtered table (2) day of peak Cr
 # severe - 2 = never severe, 4 = severe, AKI before severity onset, 5 = severe, AKI after severity onset
@@ -55,22 +55,22 @@ aki_index <- aki_index %>% select(patient_id,peak_cr_time,severe,aki_start,sever
 # aki_index <- aki_index[!(aki_index$patient_id %in% patients_already_rrt),]
 
 # Create a common labs_cr_all table containing the serum Cr values, the severity groupings and anti-viral groupings
-labs_cr_aki_tmp <- labs_cr_aki %>% select(patient_id,days_since_admission,value,min_cr_7day,min_cr_7day_retro)
-labs_cr_nonaki_tmp <- labs_cr_nonaki %>% select(patient_id,days_since_admission,value,min_cr_7day,min_cr_7day_retro)
+labs_cr_aki_tmp <- labs_cr_aki %>% select(patient_id,days_since_admission,value,min_cr_90d,min_cr_7day_retro)
+labs_cr_nonaki_tmp <- labs_cr_nonaki %>% select(patient_id,days_since_admission,value,min_cr_90d,min_cr_7day_retro)
 labs_cr_all <- bind_rows(labs_cr_aki_tmp,labs_cr_nonaki_tmp)
 labs_cr_all <- merge(labs_cr_all,aki_index,by="patient_id",all.x=TRUE)
 
 # Now, generate a table containing lab values with timepoints calculated from time of peak cr
 peak_trend <- labs_cr_all
-peak_trend <- peak_trend %>% select(patient_id,severe,covidrx_grp,days_since_admission,peak_cr_time,value,min_cr_7day,min_cr_7day_retro)
-# patient_id  severe  covidrx_grp  days_since_admission  peak_cr_time  value min_cr_7day min_cr_7day_retro
+peak_trend <- peak_trend %>% select(patient_id,severe,covidrx_grp,days_since_admission,peak_cr_time,value,min_cr_90d,min_cr_7day_retro)
+# patient_id  severe  covidrx_grp  days_since_admission  peak_cr_time  value min_cr_90d min_cr_7day_retro
 
 # Calculate the day from peak Cr
 peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(time_from_peak = days_since_admission - peak_cr_time) %>% ungroup()
 # Filter this table for Cr values that fall within the 7 day window
 peak_trend <- peak_trend %>% group_by(patient_id) %>% filter(between(time_from_peak,0,7)) %>% ungroup()
 # Normalise to baseline values used for AKI calculation
-peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_7day,min_cr_7day_retro)) %>% ungroup()
+peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_90d,min_cr_7day_retro)) %>% ungroup()
 peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
 
 # peak_trend will now be a common table to plot from the selected AKI peak
@@ -90,12 +90,12 @@ peak_cr_summ <- peak_trend_severe %>% group_by(severe,time_from_peak) %>% summar
 peak_cr_timeplot <- ggplot(peak_cr_summ,aes(x=time_from_peak,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from AKI Peak",y = "Serum Cr/Baseline Cr", color = "Severity")
 print(peak_cr_timeplot)
 
-# Plot from start of admission to 10 days post-peak AKI (if no peak, then up to 10 days)
+# Plot from start of admission to 10 days post-peak AKI (if no AKI, then from peak Cr)
 adm_to_aki_cr <- labs_cr_all
 #adm_to_aki_cr$peak_cr_time[is.na(adm_to_aki_cr$peak_cr_time)] <- 0
 adm_to_aki_cr <- adm_to_aki_cr %>% group_by(patient_id) %>% filter(between(days_since_admission,0,peak_cr_time+10)) %>% ungroup()
 adm_to_aki_cr <- adm_to_aki_cr[order(adm_to_aki_cr$patient_id,adm_to_aki_cr$days_since_admission),]
-adm_to_aki_cr <- adm_to_aki_cr %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_7day,min_cr_7day_retro)) %>% ungroup()
+adm_to_aki_cr <- adm_to_aki_cr %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_90d,min_cr_7day_retro)) %>% ungroup()
 adm_to_aki_cr <- adm_to_aki_cr %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
 adm_to_aki_summ <- adm_to_aki_cr %>% group_by(severe,days_since_admission) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n())) %>% ungroup()
 adm_to_aki_timeplot <- ggplot(adm_to_aki_summ[which(adm_to_aki_summ$days_since_admission <= 10),],aes(x=days_since_admission,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from admission",y = "Serum Cr/Baseline Cr", color = "Severity")
@@ -109,7 +109,7 @@ aki_10d_cr <- labs_cr_all
 aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% mutate(time_from_start = days_since_admission - aki_start) %>% ungroup()
 aki_10d_cr <- aki_10d_cr[order(aki_10d_cr$patient_id,aki_10d_cr$days_since_admission),]
 aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% filter(between(time_from_start,0,10)) %>% ungroup()
-aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_7day,min_cr_7day_retro)) %>% ungroup()
+aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_90d,min_cr_7day_retro)) %>% ungroup()
 aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
 aki_10d_cr_summ <- aki_10d_cr %>% group_by(severe,time_from_start) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n())) %>% ungroup()
 aki_10d_cr_timeplot <- ggplot(aki_10d_cr_summ,aes(x=time_from_start,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from AKI start",y = "Serum Cr/Baseline Cr", color = "Severity")
@@ -131,14 +131,14 @@ cr_from_covidrx_trend$covid_rx_start[is.na(cr_from_covidrx_trend$covid_rx_start)
 cr_from_covidrx_trend$covid_rx[is.na(cr_from_covidrx_trend$covid_rx)] <- 0
 cr_from_covidrx_trend <- cr_from_covidrx_trend[cr_from_covidrx_trend$covid_rx == 1,]
 
-cr_from_covidrx_trend <- cr_from_covidrx_trend %>% select(patient_id,severe,covidrx_grp,days_since_admission,covid_rx_start,peak_cr_time,value,min_cr_7day,min_cr_7day_retro)
+cr_from_covidrx_trend <- cr_from_covidrx_trend %>% select(patient_id,severe,covidrx_grp,days_since_admission,covid_rx_start,peak_cr_time,value,min_cr_90d,min_cr_7day_retro)
 cr_from_covidrx_trend <- cr_from_covidrx_trend %>% group_by(patient_id) %>% mutate(severe = ifelse(severe <= 2,0,1)) %>% mutate(covidrx_grp = ifelse((covidrx_grp == 2 || covidrx_grp == 4),1,0)) %>% ungroup()
 # Calculate the day from initiation of novel anti-virals
 cr_from_covidrx_trend <- cr_from_covidrx_trend %>% group_by(patient_id) %>% mutate(time_from_covidrx = days_since_admission - ifelse(covidrx_grp == 1,covid_rx_start,0)) %>% ungroup()
 # Filter this table for Cr values that fall within the 7 day window
 cr_from_covidrx_trend <- cr_from_covidrx_trend %>% group_by(patient_id) %>% filter(between(time_from_covidrx,0,7)) %>% ungroup()
 # Normalise to baseline values used for AKI calculation
-cr_from_covidrx_trend <- cr_from_covidrx_trend %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_7day,min_cr_7day_retro)) %>% ungroup()
+cr_from_covidrx_trend <- cr_from_covidrx_trend %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_90d,min_cr_7day_retro)) %>% ungroup()
 cr_from_covidrx_trend <- cr_from_covidrx_trend %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
 cr_from_covidrx_trend_severe <- cr_from_covidrx_trend %>% select(patient_id,severe,time_from_covidrx,ratio)
 # Headers: patient_id  severe (coded as 0/1)  time_from_covidrx  ratio
