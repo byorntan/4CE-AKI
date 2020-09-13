@@ -24,6 +24,7 @@ This is a works-in-progress - the script that I have written to process the Phas
    - data.table
    - zoo
    - RcppRoll
+I have also included a modified version of the original Dockerfile script in https://github.com/covidclinical/Phase2.0_Docker_Analysis that will generate a Docker image containing these additional packages for the AKI analyses. These files are under a separate folder 'aki_docker'.
 
 ## Additional Files Required
 1) ICD9/10 codes of common comorbidities (comorbid_icd_code.csv)
@@ -45,6 +46,7 @@ icd_code: ICD code
 type: prothrombotic event type (dvt,vt,pe,mi)
 description: String of diagnosis (for easier readability)
 ```
+For the purposes of these analyses, these two sections are not strictly required, and the relevant sections can be commented out in the initial script if these files are not readily available. 
 
 ## How to Use
 1) Ensure pre-requisite custom files are present alongside the 4CE data tables.
