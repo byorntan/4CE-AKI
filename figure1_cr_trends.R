@@ -79,13 +79,29 @@ peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(ratio = value/basel
 # Figure 1(a): Cr trends from start of AKI / after peak Cr for severe vs non-severe groups
 # =======================================================================================
 
+# First create a plot of the creatinine trends of AKI vs non-AKI patients from the day of the first AKI peak (or the highest Cr peak for non-AKI patients)
+peak_aki_vs_non_aki <- peak_trend %>% select(patient_id,severe,time_from_peak,ratio)
+colnames(peak_aki_vs_non_aki) <- c("patient_id","aki","time_from_peak","ratio")
+peak_aki_vs_non_aki <- peak_aki_vs_non_aki %>% group_by(patient_id) %>% mutate(aki = ifelse((aki == 2 | aki == 4 | aki == 5),1,0))
+peak_aki_vs_non_aki_summ <- peak_aki_vs_non_aki %>% group_by(aki,days_since_admission) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n()),n=n()) %>% ungroup()
+aki_label <- data.table(c(0,1),c("Non-AKI","AKI"))
+colnames(aki_label) <- c("aki","aki_label")
+peak_aki_vs_non_aki_summ <- merge(peak_aki_vs_non_aki_summ,aki_label,by="aki",all.x=TRUE)
+write.csv(peak_aki_vs_non_aki_summ,"labs_cr_fromPeak_aki_vs_non_aki.csv",row.names=FALSE)
+peak_aki_vs_non_aki_timeplot <- ggplot(peak_aki_vs_non_aki_summ,aes(x=time_from_peak,y=mean_ratio,group=aki))+geom_line(aes(color = factor(aki))) + geom_point(aes(color = factor(aki))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from AKI Peak",y = "Serum Cr/Baseline Cr", color = "AKI Group")
+print(peak_aki_vs_non_aki_timeplot)
+
 # Now, derive our first table peak_trend_severe to compare across the different severity groups
 peak_trend_severe <- peak_trend %>% select(patient_id,severe,time_from_peak,ratio)
 # Headers: patient_id  severe  time_from_peak  ratio
+peak_trend_severe <- peak_trend_severe %>% group_by(patient_id) %>% mutate(severe = ifelse((severe == 4 | severe == 5),4,severe))
 
 # Calculate mean and SD each for severe and non-severe groups
-peak_cr_summ <- peak_trend_severe %>% group_by(severe,time_from_peak) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n())) %>% ungroup()
-
+peak_cr_summ <- peak_trend_severe %>% group_by(severe,time_from_peak) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n()),n=n()) %>% ungroup()
+severe_label <- data.table(c(1,2,3,4),c("Non-severe, no AKI","Non-severe, AKI","Severe, no AKI","Severe, AKI"))
+colnames(severe_label) <- c("severe","severe_label")
+peak_cr_summ <- merge(peak_cr_summ,severe_label,by="severe",all.x=TRUE)
+write.csv(peak_cr_summ,"labs_cr_fromPeak_Severe+AKI.csv",row.names=FALSE)
 # Plot the graphs
 peak_cr_timeplot <- ggplot(peak_cr_summ,aes(x=time_from_peak,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from AKI Peak",y = "Serum Cr/Baseline Cr", color = "Severity")
 print(peak_cr_timeplot)
@@ -97,7 +113,10 @@ adm_to_aki_cr <- adm_to_aki_cr %>% group_by(patient_id) %>% filter(between(days_
 adm_to_aki_cr <- adm_to_aki_cr[order(adm_to_aki_cr$patient_id,adm_to_aki_cr$days_since_admission),]
 adm_to_aki_cr <- adm_to_aki_cr %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_90d,min_cr_7day_retro)) %>% ungroup()
 adm_to_aki_cr <- adm_to_aki_cr %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
-adm_to_aki_summ <- adm_to_aki_cr %>% group_by(severe,days_since_admission) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n())) %>% ungroup()
+adm_to_aki_summ <- adm_to_aki_cr %>% group_by(severe,days_since_admission) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n()),n=n()) %>% ungroup()
+adm_to_aki_summ <- adm_to_aki_summ %>% group_by(patient_id) %>% mutate(severe = ifelse((severe == 4 | severe == 5),4,severe))
+adm_to_aki_summ <- merge(adm_to_aki_summ,severe_label,by="severe",all.x=TRUE)
+write.csv(peak_cr_summ,"labs_cr_fromAdmToPeak+10D_Severe+AKI.csv",row.names=FALSE)
 adm_to_aki_timeplot <- ggplot(adm_to_aki_summ[which(adm_to_aki_summ$days_since_admission <= 10),],aes(x=days_since_admission,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from admission",y = "Serum Cr/Baseline Cr", color = "Severity")
 print(adm_to_aki_timeplot)
 
@@ -108,10 +127,13 @@ aki_10d_cr <- labs_cr_all
 #aki_10d_cr <- aki_10d_cr[aki_10d_cr$severe %in% c(2,4,5),]
 aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% mutate(time_from_start = days_since_admission - aki_start) %>% ungroup()
 aki_10d_cr <- aki_10d_cr[order(aki_10d_cr$patient_id,aki_10d_cr$days_since_admission),]
-aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% filter(between(time_from_start,0,10)) %>% ungroup()
+aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% filter(between(time_from_start,-10,10)) %>% ungroup()
 aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_90d,min_cr_7day_retro)) %>% ungroup()
 aki_10d_cr <- aki_10d_cr %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
-aki_10d_cr_summ <- aki_10d_cr %>% group_by(severe,time_from_start) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n())) %>% ungroup()
+aki_10d_cr_summ <- aki_10d_cr %>% group_by(severe,time_from_start) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n()),n=n()) %>% ungroup()
+aki_10d_cr_summ <- aki_10d_cr_summ %>% group_by(patient_id) %>% mutate(severe = ifelse((severe == 4 | severe == 5),4,severe))
+aki_10d_cr_summ <- merge(aki_10d_cr_summ,severe_label,by="severe",all.x=TRUE)
+write.csv(aki_10d_cr_summ,"labs_cr_fromStart_Severe+AKI.csv",row.names=FALSE)
 aki_10d_cr_timeplot <- ggplot(aki_10d_cr_summ,aes(x=time_from_start,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from AKI start",y = "Serum Cr/Baseline Cr", color = "Severity")
 print(aki_10d_cr_timeplot)
 
@@ -122,7 +144,7 @@ print(aki_10d_cr_timeplot)
 peak_trend_covidviral <- peak_trend %>% select(patient_id,covidrx_grp,time_from_peak,ratio)
 peak_cr_covidviral_summ <- peak_trend_covidviral %>% group_by(covidrx_grp,time_from_peak) %>% summarise(mean_ratio = mean(ratio),sem_ratio = sd(ratio)/sqrt(n())) %>% ungroup()
 peak_cr_covidviral_timeplot <- ggplot(peak_cr_covidviral_summ,aes(x=time_from_peak,y=mean_ratio,group=covidrx_grp))+geom_line(aes(color = factor(covidrx_grp))) + geom_point(aes(color = factor(covidrx_grp))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from AKI Peak",y = "Serum Cr/Baseline Cr", color = "Severity + COVID-19 Treatment")
-print(peak_cr_covidviral_timeplot)
+print(peak_cr_covidviral_timeplot)                                             
 
 # Plotting from initiation of novel anti-virals
 cr_from_covidrx_trend <- merge(peak_trend,med_covid19_new_date,by="patient_id",all.x=TRUE)

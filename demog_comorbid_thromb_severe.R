@@ -18,8 +18,8 @@ demographics_filt <- demographics_filt %>% select(patient_id,siteid,sex,age_grou
 # ======================================
 # Comorbidities & Prothrombotic Events
 # ======================================
-# diag_icd9 <- diagnosis[diagnosis$concept_type == "DIAG-ICD9",]
-# diag_icd10 <- diagnosis[diagnosis$concept_type == "DIAG-ICD10",]
+diag_icd9 <- diagnosis[diagnosis$concept_type == "DIAG-ICD9",]
+diag_icd10 <- diagnosis[diagnosis$concept_type == "DIAG-ICD10",]
 # 
 # # Filter comorbids from all diagnoses
 # comorbid_icd9 <- diag_icd9[diag_icd9$concept_code %in% comorbid_icd9_ref$icd_code,]

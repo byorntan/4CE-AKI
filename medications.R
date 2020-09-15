@@ -33,12 +33,14 @@ colnames(med_new)[3] <- "start_day"
 # If the value is < 0 (and presumably > -365) then the medication was initiated before the start of AKI
 # Otherwise it means the medication had been started after the peak Cr had been achieved
 # This will give insight into which medications may be potentially nephrotoxic
-aki_start_time <- labs_aki_summ[,c(1,12)]
+aki_start_time <- labs_aki_summ[,c(1,5)]
 med_new_aki <- merge(med_new,aki_start_time,by="patient_id",all.x=TRUE)
-med_new_aki$offset_aki <- med_new_aki$start_day - med_new_aki$aki_start
+med_new_aki <- med_new_aki[!is.na(med_new_aki$day_min),]
+med_new_aki <- med_new_aki %>% distinct()
+med_new_aki <- med_new_aki %>% group_by(patient_id) %>% mutate(offset_aki = start_day - day_min) %>% filter(offset_aki == min(offset_aki))
 # Re-code whether medication was given before AKI - 1 = yes, 0 = no
 med_new_aki <- mutate(med_before_aki = ifelse(offset_aki <=0,1,0))
-med_new_aki <- med_new_aki[,-c(3,4,5)]
+med_new_aki <- med_new_aki[,c(1,2,6)]
 med_new_aki <- spread(med_new_aki,concept_code,med_before_aki)
 med_new_aki[is.na(med_new_aki)] <- -999
 
