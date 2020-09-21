@@ -67,11 +67,19 @@ peak_trend <- peak_trend %>% select(patient_id,severe,covidrx_grp,days_since_adm
 
 # Calculate the day from peak Cr
 peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(time_from_peak = days_since_admission - peak_cr_time) %>% ungroup()
-# Filter this table for Cr values that fall within the 7 day window
-peak_trend <- peak_trend %>% group_by(patient_id) %>% filter(between(time_from_peak,0,7)) %>% ungroup()
+## Filter this table for Cr values that fall within the 7 day window
+# peak_trend <- peak_trend %>% group_by(patient_id) %>% filter(between(time_from_peak,0,7)) %>% ungroup()
 # Normalise to baseline values used for AKI calculation
 peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(baseline_cr = min(min_cr_90d,min_cr_7day_retro)) %>% ungroup()
-peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
+
+# In the event longitudinal data becomes very long, we will create a column where the very first baseline Cr for the index AKI is generated for each patient
+first_baseline <- peak_trend %>% group_by(patient_id) %>% filter(time_from_peak == 0) %>% select(patient_id,baseline_cr) %>% distinct()
+colnames(first_baseline)[2] <- "first_baseline_cr"
+peak_trend <- merge(peak_trend,first_baseline,by="patient_id",all.x=TRUE)
+peak_trend <- peak_trend %>% select(patient_id,severe,covidrx_grp,days_since_admission,peak_cr_time,value,min_cr_90d,min_cr_7day_retro,time_from_peak,baseline_cr,first_baseline_cr)
+
+peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(ratio = value/first_baseline_cr) %>% ungroup()
+#peak_trend <- peak_trend %>% group_by(patient_id) %>% mutate(ratio = value/baseline_cr) %>% ungroup()
 
 # peak_trend will now be a common table to plot from the selected AKI peak
 
@@ -90,6 +98,7 @@ peak_aki_vs_non_aki_summ <- merge(peak_aki_vs_non_aki_summ,aki_label,by="aki",al
 write.csv(peak_aki_vs_non_aki_summ,"labs_cr_fromPeak_aki_vs_non_aki.csv",row.names=FALSE)
 peak_aki_vs_non_aki_timeplot <- ggplot(peak_aki_vs_non_aki_summ,aes(x=time_from_peak,y=mean_ratio,group=aki))+geom_line(aes(color = factor(aki))) + geom_point(aes(color = factor(aki))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from AKI Peak",y = "Serum Cr/Baseline Cr", color = "AKI Group")
 print(peak_aki_vs_non_aki_timeplot)
+ggsave("peak_Cr_AKI_vs_NonAKI.png",plot=peak_aki_vs_non_aki_timeplot)
 
 # Now, derive our first table peak_trend_severe to compare across the different severity groups
 peak_trend_severe <- peak_trend %>% select(patient_id,severe,time_from_peak,ratio)
@@ -168,8 +177,12 @@ cr_from_covidrx_summ <- cr_from_covidrx_trend_severe %>% group_by(severe,time_fr
 cr_from_covidrx_timeplot <- ggplot(cr_from_covidrx_summ,aes(x=time_from_covidrx,y=mean_ratio,group=severe))+geom_line(aes(color = factor(severe))) + geom_point(aes(color = factor(severe))) + geom_errorbar(aes(ymin=mean_ratio-sem_ratio,ymax=mean_ratio+sem_ratio),position=position_dodge(0.05))+ theme(legend.position="right") + labs(x = "Days from COVIDVIRAL Start",y = "Serum Cr/Baseline Cr", color = "Severity")
 print(cr_from_covidrx_timeplot)
 
+# =================================================================================================
+# Figure 1(c) Kaplan-Meier plot for time to renal recovery (defined as time to reach ratio < 1.25)
+# =================================================================================================
+
 # ============================================================================================
-# Figure 1(c) Comparing AKI plots for patients with CKD vs non-CKD (eGFR >= 60 vs eGFR < 60)
+# Figure 1(d) Comparing AKI plots for patients with CKD vs non-CKD (eGFR >= 60 vs eGFR < 60)
 # ============================================================================================
 # Works in progress as exact age is not available in data extracted for Phase 2.0 (only broad age groups)
 egdr_ckdepi <- function(sex,age,race=0,creatinine) {
