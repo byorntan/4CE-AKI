@@ -228,8 +228,9 @@ labs_cr_aki_tmp4 <- labs_cr_aki_tmp4[!is.na(labs_cr_aki_tmp4$valid),]
 labs_cr_aki_tmp4 <- labs_cr_aki_tmp4 %>% group_by(patient_id,days_since_admission) %>% mutate(min_cr_7d_final = min(min_cr_90d,min_cr_retro_7day)) %>% mutate(delta_cr = value - min_cr_7d_final)
 
 # Use the largest delta_cr to find the peak of each AKI
-labs_cr_aki_delta_maxima <- labs_cr_aki_tmp4 %>% group_by(patient_id) %>% summarise(days_since_admission=days_since_admission[which.peaks(delta_cr,decreasing=FALSE)],delta_maxima = delta_cr[which.peaks(delta_cr,decreasing=FALSE)])
+labs_cr_aki_delta_maxima <- labs_cr_aki_tmp4 %>% group_by(patient_id) %>% filter(delta_cr %in% delta_cr[which.peaks(delta_cr,decreasing=FALSE)])
 labs_cr_aki_delta_maxima$delta_is_max = 1
+labs_cr_aki_delta_maxima <- labs_cr_aki_delta_maxima %>% rename(delta_maxima = delta_cr) %>% select(patient_id,days_since_admission,delta_maxima,delta_is_max)
 labs_cr_aki_tmp4 <- merge(labs_cr_aki_tmp4,labs_cr_aki_delta_maxima,by=c("patient_id","days_since_admission"),all.x=TRUE)
 
 # Generate a separate table (for reference) of all creatinine peaks not fulfilling KDIGO AKI criteria
@@ -252,6 +253,8 @@ rm(labs_cr_aki_tmp)
 rm(labs_cr_aki_tmp2)
 rm(labs_cr_aki_tmp3)
 rm(labs_cr_aki_tmp4)
+
+labs_aki_summ <- labs_aki_summ %>% distinct(patient_id,days_since_admission,.keep_all=TRUE)
 
 # Final headers for labs_aki_summ:
 # patient_id,siteid,days_since_admission,value,day_min,day_min_retro,min_cr_90d,min_cr_48h,min_cr_retro_7day,min_cr_48h_retro,min_cr_7d_final,cr_7d,cr_90d,delta_cr,aki_kdigo,aki_kdigo_retro,aki_kdigo_final,akd_7d,akd_90d

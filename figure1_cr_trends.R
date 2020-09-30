@@ -16,7 +16,7 @@ library(dplyr)
 # This analysis uses the index AKI episode
 # Feel free to modify the code to look at other types of AKI episodes, e.g. you can filter for the most severe AKI episode
 # First, filter the labs_aki_severe table to show only the index AKI episodes
-aki_only_index <- labs_aki_severe %>% group_by(patient_id) %>% filter(days_since_admission == min(days_since_admission)) %>% ungroup()
+aki_only_index <- labs_aki_severe %>% group_by(patient_id) %>% filter(days_since_admission >= 0) %>% filter(days_since_admission == min(days_since_admission)) %>% ungroup()
 # patient_id	site_id	days_since_admission	value	day_min	day_min_retro	min_cr_90d	min_cr_48h	min_cr_7day_retro	min_cr_48h_retro	min_cr_7d_final	cr_7d	cr_90d	delta_cr	aki_kdigo	aki_kdigo_retro	aki_kdigo_final	akd_7d	akd_90d	severe  time_to_severe	severe_to_aki	severe_before_aki
 
 # Generate the patient list including (1) severity indices from this filtered table (2) day of peak Cr
