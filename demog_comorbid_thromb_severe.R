@@ -34,7 +34,7 @@ diag_icd10 <- diagnosis[diagnosis$concept_type == "DIAG-ICD10",]
 # comorbid <- comorbid[,-2]
 # comorbid$present <- 1
 # comorbid <- comorbid %>% distinct()
-# comorbid <- spread(comorbid,comorbid_type,present)
+# comorbid <- comorbid %>% spread(comorbid_type,present)
 # comorbid[is.na(comorbid)] <- 0
 # 
 # # Filter prothrombotic events from all diagnoses

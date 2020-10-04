@@ -1,0 +1,11 @@
+icd_version,icd_code,type,description
+DIAG-ICD10,I80,dvt,Phlebitis and thrombophlebitis of other deep vessels of lower extremities
+DIAG-ICD10,I81,vt,Portal vein thrombosis
+DIAG-ICD10,I82,vt,"Budd-Chiari syndrome, thrombosis of vena cava, renal vein, lower extremities, or otherwise specified"
+DIAG-ICD10,I74,art_thromb,Embolism and thrombosis of abdominal aorta
+DIAG-ICD10,I26,pe,pulmonary embolism
+DIAG-ICD10,I21,acs,Myocardial infarction
+DIAG-ICD11,I22,acs,Myocardial infarction
+DIAG-ICD12,I23,acs,Myocardial infarction
+DIAG-ICD13,I24,acs,Myocardial infarction
+DIAG-ICD14,I25,acs,Myocardial infarction

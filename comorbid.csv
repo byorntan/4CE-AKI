@@ -1,0 +1,166 @@
+icd_version,icd_code,comorbid_type,description
+DIAG-ICD10,J45,asthma,Asthma
+DIAG-ICD10,J46,asthma,Asthma
+DIAG-ICD10,A15,bronchiectasis,Bronchiectasis
+DIAG-ICD10,A16,bronchiectasis,Bronchiectasis
+DIAG-ICD10,J47,bronchiectasis,Bronchiectasis
+DIAG-ICD10,D63,ckd,Chronic kidney disease
+DIAG-ICD10,E14,ckd,Chronic kidney disease
+DIAG-ICD10,I12,ckd,Chronic kidney disease (ESRF)
+DIAG-ICD10,N08,ckd,Chronic kidney disease
+DIAG-ICD10,N18,ckd,Chronic kidney disease
+DIAG-ICD10,J44,copd,Chronic obstructive pulmonary disease
+DIAG-ICD10,E10,dm,Diabetes mellitus
+DIAG-ICD10,E11,dm,Diabetes mellitus
+DIAG-ICD10,E78,hld,Hyperlipidemia
+DIAG-ICD10,I10,htn,Hypertension
+DIAG-ICD10,I11,ihd,Ischemic heart disease
+DIAG-ICD10,I13,ihd,Ischemic heart disease
+DIAG-ICD10,I20,ihd,Ischemic heart disease
+DIAG-ICD10,I21,ihd,Ischemic heart disease
+DIAG-ICD10,I22,ihd,Ischemic heart disease
+DIAG-ICD10,I23,ihd,Ischemic heart disease
+DIAG-ICD10,I24,ihd,Ischemic heart disease
+DIAG-ICD10,I25,ihd,Ischemic heart disease
+DIAG-ICD10,I50,ihd,Ischemic heart disease
+DIAG-ICD10,I51,ihd,Ischemic heart disease
+DIAG-ICD10,I97,ihd,Ischemic heart disease
+DIAG-ICD10,O29,ihd,Ischemic heart disease
+DIAG-ICD10,O74,ihd,Ischemic heart disease
+DIAG-ICD10,T81,ihd,Ischemic heart disease
+DIAG-ICD10,J60,ild,Pulmonary fibrosis
+DIAG-ICD10,J61,ild,Pulmonary fibrosis
+DIAG-ICD10,J62,ild,Pulmonary fibrosis
+DIAG-ICD10,J63,ild,Pulmonary fibrosis
+DIAG-ICD10,J63,ild,Pulmonary fibrosis
+DIAG-ICD10,J64,ild,Pulmonary fibrosis
+DIAG-ICD10,J66,ild,Pulmonary fibrosis
+DIAG-ICD10,J67,ild,Pulmonary fibrosis
+DIAG-ICD10,J68,ild,Pulmonary fibrosis
+DIAG-ICD10,J70,ild,Pulmonary fibrosis
+DIAG-ICD10,J84,ild,Pulmonary fibrosis
+DIAG-ICD10,P27,ild,Pulmonary fibrosis
+DIAG-ICD10,K72,cld,Chronic liver disease
+DIAG-ICD10,K74,cld,Liver cirrhosis
+DIAG-ICD10,K76,cld,Liver cirrhosis
+DIAG-ICD10,P78,cld,Liver cirrhosis
+DIAG-ICD10,M32,rheum,Rheumatological conditions
+DIAG-ICD10,M34,rheum,Rheumatological conditions
+DIAG-ICD10,M05,rheum,Rheumatological conditions
+DIAG-ICD10,M45,rheum,Rheumatological conditions
+DIAG-ICD10,M79,rheum,Rheumatological conditions
+DIAG-ICD10,M07,rheum,Rheumatological conditions
+DIAG-ICD10,D68,rheum,Rheumatological conditions
+DIAG-ICD10,I26,pe,pulmonary embolism
+DIAG-ICD10,I80,dvt,Deep vein thrombosis
+DIAG-ICD10,A16,ptb,Pulmonary tuberculosis
+DIAG-ICD10,A18,ptb,Pulmonary tuberculosis
+DIAG-ICD10,C33,lung_ca,Pulmonary malignancies
+DIAG-ICD10,C34,lung_ca,Pulmonary malignancies
+DIAG-ICD10,C78,lung_ca,Pulmonary malignancies
+DIAG-ICD10,C00,cancer,Any malignancy
+DIAG-ICD10,C01,cancer,Any malignancy
+DIAG-ICD10,C02,cancer,Any malignancy
+DIAG-ICD10,C03,cancer,Any malignancy
+DIAG-ICD10,C04,cancer,Any malignancy
+DIAG-ICD10,C05,cancer,Any malignancy
+DIAG-ICD10,C06,cancer,Any malignancy
+DIAG-ICD10,C07,cancer,Any malignancy
+DIAG-ICD10,C08,cancer,Any malignancy
+DIAG-ICD10,C09,cancer,Any malignancy
+DIAG-ICD10,C10,cancer,Any malignancy
+DIAG-ICD10,C11,cancer,Any malignancy
+DIAG-ICD10,C12,cancer,Any malignancy
+DIAG-ICD10,C13,cancer,Any malignancy
+DIAG-ICD10,C14,cancer,Any malignancy
+DIAG-ICD10,C15,cancer,Any malignancy
+DIAG-ICD10,C16,cancer,Any malignancy
+DIAG-ICD10,C17,cancer,Any malignancy
+DIAG-ICD10,C18,cancer,Any malignancy
+DIAG-ICD10,C19,cancer,Any malignancy
+DIAG-ICD10,C20,cancer,Any malignancy
+DIAG-ICD10,C21,cancer,Any malignancy
+DIAG-ICD10,C22,cancer,Any malignancy
+DIAG-ICD10,C23,cancer,Any malignancy
+DIAG-ICD10,C24,cancer,Any malignancy
+DIAG-ICD10,C25,cancer,Any malignancy
+DIAG-ICD10,C26,cancer,Any malignancy
+DIAG-ICD10,C27,cancer,Any malignancy
+DIAG-ICD10,C28,cancer,Any malignancy
+DIAG-ICD10,C29,cancer,Any malignancy
+DIAG-ICD10,C30,cancer,Any malignancy
+DIAG-ICD10,C31,cancer,Any malignancy
+DIAG-ICD10,C32,cancer,Any malignancy
+DIAG-ICD10,C33,cancer,Any malignancy
+DIAG-ICD10,C34,cancer,Any malignancy
+DIAG-ICD10,C35,cancer,Any malignancy
+DIAG-ICD10,C36,cancer,Any malignancy
+DIAG-ICD10,C37,cancer,Any malignancy
+DIAG-ICD10,C38,cancer,Any malignancy
+DIAG-ICD10,C39,cancer,Any malignancy
+DIAG-ICD10,C40,cancer,Any malignancy
+DIAG-ICD10,C41,cancer,Any malignancy
+DIAG-ICD10,C42,cancer,Any malignancy
+DIAG-ICD10,C43,cancer,Any malignancy
+DIAG-ICD10,C44,cancer,Any malignancy
+DIAG-ICD10,C45,cancer,Any malignancy
+DIAG-ICD10,C46,cancer,Any malignancy
+DIAG-ICD10,C47,cancer,Any malignancy
+DIAG-ICD10,C48,cancer,Any malignancy
+DIAG-ICD10,C49,cancer,Any malignancy
+DIAG-ICD10,C50,cancer,Any malignancy
+DIAG-ICD10,C51,cancer,Any malignancy
+DIAG-ICD10,C52,cancer,Any malignancy
+DIAG-ICD10,C53,cancer,Any malignancy
+DIAG-ICD10,C54,cancer,Any malignancy
+DIAG-ICD10,C55,cancer,Any malignancy
+DIAG-ICD10,C56,cancer,Any malignancy
+DIAG-ICD10,C57,cancer,Any malignancy
+DIAG-ICD10,C58,cancer,Any malignancy
+DIAG-ICD10,C59,cancer,Any malignancy
+DIAG-ICD10,C60,cancer,Any malignancy
+DIAG-ICD10,C61,cancer,Any malignancy
+DIAG-ICD10,C62,cancer,Any malignancy
+DIAG-ICD10,C63,cancer,Any malignancy
+DIAG-ICD10,C64,cancer,Any malignancy
+DIAG-ICD10,C65,cancer,Any malignancy
+DIAG-ICD10,C66,cancer,Any malignancy
+DIAG-ICD10,C67,cancer,Any malignancy
+DIAG-ICD10,C68,cancer,Any malignancy
+DIAG-ICD10,C69,cancer,Any malignancy
+DIAG-ICD10,C70,cancer,Any malignancy
+DIAG-ICD10,C71,cancer,Any malignancy
+DIAG-ICD10,C72,cancer,Any malignancy
+DIAG-ICD10,C73,cancer,Any malignancy
+DIAG-ICD10,C74,cancer,Any malignancy
+DIAG-ICD10,C75,cancer,Any malignancy
+DIAG-ICD10,C76,cancer,Any malignancy
+DIAG-ICD10,C77,cancer,Any malignancy
+DIAG-ICD10,C78,cancer,Any malignancy
+DIAG-ICD10,C79,cancer,Any malignancy
+DIAG-ICD10,C80,cancer,Any malignancy
+DIAG-ICD10,C81,cancer,Any malignancy
+DIAG-ICD10,C82,cancer,Any malignancy
+DIAG-ICD10,C83,cancer,Any malignancy
+DIAG-ICD10,C84,cancer,Any malignancy
+DIAG-ICD10,C85,cancer,Any malignancy
+DIAG-ICD10,C86,cancer,Any malignancy
+DIAG-ICD10,C87,cancer,Any malignancy
+DIAG-ICD10,C88,cancer,Any malignancy
+DIAG-ICD10,C89,cancer,Any malignancy
+DIAG-ICD10,C90,cancer,Any malignancy
+DIAG-ICD10,C91,cancer,Any malignancy
+DIAG-ICD10,C92,cancer,Any malignancy
+DIAG-ICD10,C93,cancer,Any malignancy
+DIAG-ICD10,C94,cancer,Any malignancy
+DIAG-ICD10,C95,cancer,Any malignancy
+DIAG-ICD10,C96,cancer,Any malignancy
+DIAG-ICD10,C97,cancer,Any malignancy
+DIAG-ICD10,I81,vt,Portal vein thrombosis
+DIAG-ICD10,I82,vt,"Budd-Chiari syndrome, thrombosis of vena cava, renal vein, lower extremities, or otherwise specified"
+DIAG-ICD10,I74,art_thromb,Embolism and thrombosis of abdominal aorta
+DIAG-ICD10,I21,acs,Myocardial infarction
+DIAG-ICD11,I22,acs,Myocardial infarction
+DIAG-ICD12,I23,acs,Myocardial infarction
+DIAG-ICD13,I24,acs,Myocardial infarction
+DIAG-ICD14,I25,acs,Myocardial infarction
