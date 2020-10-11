@@ -1,0 +1,26 @@
+Package: FourCePhase2.1AKI
+Title: 4CE Consortium for COVID-19 - Acute Kidney Injury - Statistical Analysis Package
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Byorn",
+           family = "Tan",
+           role = c("aut", "cre"),
+           email = "byorn_wl_tan@nuhs.edu.sg",
+           comment = c(ORCID = "0000-0002-1658-259X"))
+Description: Performs statistical analysis relevant to acute kidney injury for the 4CE Consortium cohort of COVID-19 patients. Generates aggregate data which is to be submitted to a central private repository for meta-analysis.
+License: GPL3
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr (>= 1.0.0),
+    tidyr (>= 1.1.2),
+    purrr (>= 0.3.4),
+    ggplot2 (>= 3.3.2),
+    tibble (>= 3.0.0),
+    data.table (>= 1.13.0),
+    RcppRoll (>= 0.3.0),
+    zoo (>= 1.8-8),
+    survival (>= 3.1-12),
+    survminer (>= 0.4.8)
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
