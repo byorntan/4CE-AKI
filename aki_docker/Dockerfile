@@ -15,12 +15,13 @@ RUN R -e "install.packages('splines')"
 RUN R -e "install.packages('survival')"
 RUN R -e "install.packages('RcppRoll')"
 RUN R -e "install.packages('zoo')"
+RUN R -e "install.packages('survminer')"
 
 ## install RStudio Server / notebooks
 WORKDIR /opt/rstudioserver
 
-RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.3_amd64.deb
-RUN dpkg -i ./libssl1.0.0_1.0.2n-1ubuntu5.3_amd64.deb
+RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.4_amd64.deb
+RUN dpkg -i ./libssl1.0.0_1.0.2n-1ubuntu5.4_amd64.deb
 
 ## RUN apt-get update
 RUN apt-get install -y gdebi-core

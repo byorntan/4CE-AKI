@@ -4,7 +4,7 @@
 \alias{runAnalysis}
 \title{Runs the analytic workflow for the AKI project}
 \usage{
-runAnalysis()
+runAnalysis(is_obfuscated = TRUE, obfuscation_value = 3)
 }
 \description{
 Runs the analytic workflow for the AKI project

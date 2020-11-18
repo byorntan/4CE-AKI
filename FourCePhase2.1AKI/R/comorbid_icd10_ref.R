@@ -15,15 +15,14 @@
 #' This table is a truncated version derived from the main table comorbid_ref.
 #' 
 #' The headers in the table are as follows:
-#' icd_code  full_code comorbid_type
 #' 
-#' icd_code - shortened ICD code (see below)
-#' full_code - full ICD code (see below)
-#' comorbid_type - diagnosis category as above
+#' - icd_code - shortened ICD code (see below)
+#' - full_code - full ICD code (see below)
+#' - comorbid_type - diagnosis category as above
 #' 
 #' Due to the variations in the way ICD codes may be stored, we have adhered to the following conventions:
 #' - icd_code will store the broad category of the diagnosis
-#' - Full ICD diagnosis codes will have the major category abd subcategory separated by a period
+#' - Full ICD diagnosis codes will have the major category and subcategory separated by a period
 #' For example, the ICD-10 diagnosis "Chronic kidney disease, stage 1" with full code N18.1 will have 
 #' icd_code = "N18" and full_code = "N18.1".
 #' Please ensure that your data tables store diagnoses codes as their broad categories. (e.g. N18.1 will be 
